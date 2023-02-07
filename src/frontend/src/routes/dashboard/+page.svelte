@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Project from "./project/Project.svelte";
-	import Sidebar from "./sidebar/Sidebar.svelte";
+	import Project from "./_project/Project.svelte";
+	import Sidebar from "./_sidebar/Sidebar.svelte";
 
 </script>
 <main class="flex max-h-full h-[100vh]">
