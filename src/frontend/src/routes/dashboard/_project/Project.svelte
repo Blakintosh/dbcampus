@@ -1,16 +1,19 @@
 <script lang="ts">
+	import type { HealthSummary, SoftwareProject, SurveyFactor, SurveySummary } from "../models";
 	import HealthRag from "./health/HealthRag.svelte";
 	import Button from "./shared/Button.svelte";
 	import Tile from "./shared/Tile.svelte";
 	import SurveyRundown from "./surveyRundown/SurveyRundown.svelte";
 
-	export let issues: Number = 0;
+	export let name: string;
+	export let health: HealthSummary;
+	export let survey: SurveySummary;
 </script>
 
 <article class="p-4 shadow-inner flex-grow bg-slate-100 flex">
 	<section class="flex-grow">
 		<Tile>
-			<h1 class="text-3xl font-serif mb-4">Example Software Engineering Project</h1>
+			<h1 class="text-3xl font-serif mb-4">{name}</h1>
 			
 			<div class="flex justify-between items-center">
 				<p class="text-md mx-4">
@@ -29,7 +32,7 @@
 		<div class="flex">
 			<div class="w-[55%] flex-shrink-0">
 				<Tile heading="Surveys Rundown">
-					<SurveyRundown/>
+					<SurveyRundown {...survey}/>
 
 					<p class="flex justify-center mt-4">
 						<Button label="Issue a Survey"/>
@@ -46,10 +49,10 @@
 
 	<section class="w-96 flex-shrink-0">
 		<Tile heading="Project Health" isDark>
-			<HealthRag status="unknown"/>
+			<HealthRag status={health.status}/>
 
 			<p class="my-2 text-center text-sm">
-				{issues} issues and suggestions.
+				{health.issues} issues and suggestions.
 			</p>
 
 			<p class="flex justify-center">
