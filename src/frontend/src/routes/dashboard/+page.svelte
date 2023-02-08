@@ -5,7 +5,7 @@
 
 	// Fetch data from BE
 	let project: SoftwareProject = {
-		name: "Placeholder Project",
+		name: "New Exciting Project",
 		health: {
 			status: "warning",
 			issues: 2
@@ -14,21 +14,39 @@
 			date: new Date(),
 			factors: [
 				{
-					name: "Factor 1",
+					name: "Communication",
 					description: "Description 1",
 					satisfaction: 0.87,
 					status: "normal"
 				},
 				{
-					name: "Factor 2",
+					name: "No Scope Creep",
 					description: "Description 3",
 					satisfaction: 0.62,
+					status: "warning"
+				},
+				{
+					name: "Rewarding",
+					description: "Description 3",
+					satisfaction: 0.315,
+					status: "danger"
+				},
+				{
+					name: "Worthwhile",
+					description: "Description 4",
+					satisfaction: 0.7185,
 					status: "warning"
 				}
 			]
 		}
 	} satisfies SoftwareProject;
 </script>
+
+<svelte:head>
+	<title>{project.name} - Pitstop Dashboard</title>
+	<meta name="description" content="Project overview dashboard.">
+</svelte:head>
+
 <main class="flex max-h-full h-[100vh]">
 	<Sidebar />
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { HealthSummary, SoftwareProject, SurveyFactor, SurveySummary } from "../models";
+	import BudgetRundown from "./budgetRundown/BudgetRundown.svelte";
 	import HealthRag from "./health/HealthRag.svelte";
 	import Button from "./shared/Button.svelte";
 	import Tile from "./shared/Tile.svelte";
@@ -41,7 +42,7 @@
 			</div>
 			<div class="flex-grow">
 				<Tile heading="Project Budget">
-	
+					<BudgetRundown />
 				</Tile>
 			</div>
 		</div>
