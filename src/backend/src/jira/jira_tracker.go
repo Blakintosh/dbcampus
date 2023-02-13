@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"system"
+	"os"
 
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 )
@@ -18,19 +18,20 @@ func main() {
 	// }
 	// client1 := &http.Client{Transport: tr}
 	tp := jira.BasicAuthTransport{
-		Username: "Karim.Zeyads@warwick.ac.uk",
-		APIToken: "ATATT3xFfGF0niFoT5pmrKVYdKFoYQ5Li4rYAubiFuv8nIPlben8R336h2PLu7Px37xfPHEXp2LaBxncoh8AACpDmVsV_ETtemD5zlhgF5uVfYEFPyJO-PnxMFvbEMnn66p7-uM-1FMUKPSp5Ev7a-f-0COVzuDnqfFokCFOj__rX3QLRvNjsXw=27D9CA4E",
+		Username: "<username>",
+		APIToken: "<api_token>",
 	}
 	client, err := jira.NewClient(jiraURL, tp.Client())
 	if err != nil {
 		fmt.Printf("Error at making a new client: %e ", err)
-		system.Exit(-1)
+		os.Exit(-1)
+
 	}
 
 	u, _, err := client.User.GetCurrentUser(context.Background())
 	if err != nil {
 		fmt.Printf("Error at getting user: %e", err)
-		system.Exit(-1)
+		os.Exit(-1)
 	}
 
 	fmt.Printf("Email: %v\n", u.EmailAddress)
