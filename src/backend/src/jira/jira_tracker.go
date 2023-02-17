@@ -22,8 +22,8 @@ func main() {
 
 	// Jira team url
 	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "Karim.Zeyada@warwick.ac.uk"
-	token := "ATATT3xFfGF0niFoT5pmrKVYdKFoYQ5Li4rYAubiFuv8nIPlben8R336h2PLu7Px37xfPHEXp2LaBxncoh8AACpDmVsV_ETtemD5zlhgF5uVfYEFPyJO-PnxMFvbEMnn66p7-uM-1FMUKPSp5Ev7a-f-0COVzuDnqfFokCFOj__rX3QLRvNjsXw=27D9CA4E"
+	email := "email"
+	token := "token"
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
