@@ -22,8 +22,8 @@ func main() {
 
 	// Jira team url
 	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "email"
-	token := "token"
+	email := "Karim.Zeyada@warwick.ac.uk"
+	token := "ATATT3xFfGF0niFoT5pmrKVYdKFoYQ5Li4rYAubiFuv8nIPlben8R336h2PLu7Px37xfPHEXp2LaBxncoh8AACpDmVsV_ETtemD5zlhgF5uVfYEFPyJO-PnxMFvbEMnn66p7-uM-1FMUKPSp5Ev7a-f-0COVzuDnqfFokCFOj__rX3QLRvNjsXw=27D9CA4E"
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
@@ -52,6 +52,14 @@ func main() {
 		log.Fatalf("Error getting number of overdue tasks: %v\n", err)
 	}
 	log.Printf("Number of overdue tasks: %v", numOverDueTasks)
+
+	// Getting priority of overdue tasks
+	priorityOfTasks, err := getPriorities(email, token, jiraURL, "PIT", client)
+	if err != nil {
+		log.Fatalf("Error getting priority of overdue tasks: %v\n", err)
+	}
+	log.Printf("Priority of overdue tasks: %v", priorityOfTasks)
+
 }
 
 /************************ Authentication set up *******************************/
@@ -135,6 +143,29 @@ func getNumOverDueIssuesFromProject(email string, token string, url string, proj
 
 	}
 	return counter, nil
+}
+
+/**************** Get priorties of all issues in a project ********************/
+func getPriorities(email string, token string, url string, projectName string, client *jira.Client) ([]string, error) {
+	// Getting all issues
+	issues, _, err := client.Issue.Search(context.Background(), "project = "+projectName, nil)
+	if err != nil {
+		log.Fatalf("Error getting issues: %v\n", err)
+	}
+
+	// Create a slice to store all priorities
+	priorities := make([]string, 0)
+
+	// Get the priority of each issue
+	for _, issue := range issues {
+		// Get the priority
+		priority := issue.Fields.Priority.Name
+		log.Printf("Priority: %v", priority)
+		priorities = append(priorities, priority)
+
+	}
+
+	return priorities, nil
 }
 
 /******************** Getting all projects example ************************/
