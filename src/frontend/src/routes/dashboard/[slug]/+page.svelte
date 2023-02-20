@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { SoftwareProject } from "./models";
+	import type { SoftwareProject } from "../models";
+	import Project from "./_project/Project.svelte";
+	import Sidebar from "./_sidebar/Sidebar.svelte";
+
 	// Fetch data from BE
 	let project: SoftwareProject = {
 		id: 1,
@@ -87,4 +90,7 @@
 </svelte:head>
 
 <main class="flex max-h-full h-[100vh]">
+	<Sidebar {projects}/>
+
+	<Project {...project}/>
 </main>
