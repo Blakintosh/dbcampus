@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"errors"
 
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 )
@@ -22,8 +23,8 @@ func main() {
 
 	// Jira team url
 	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "Karim.Zeyada@warwick.ac.uk"
-	token := "ATATT3xFfGF0niFoT5pmrKVYdKFoYQ5Li4rYAubiFuv8nIPlben8R336h2PLu7Px37xfPHEXp2LaBxncoh8AACpDmVsV_ETtemD5zlhgF5uVfYEFPyJO-PnxMFvbEMnn66p7-uM-1FMUKPSp5Ev7a-f-0COVzuDnqfFokCFOj__rX3QLRvNjsXw=27D9CA4E"
+	email := "leon.pennington@warwick.ac.uk"
+	token := "ATATT3xFfGF0Z5Lxy5XQoNjI31MzitcRx8IZQ-idkqAnXnQJNIUSXr4eDy0UN7c-e9Ijg-8dN0fZZIFA60WHwWUcwX1uBTwtOzebHajNbc_rk46HIxkg9tzg9Zn-KYKnWx2ntx6YX2PFXhdoeiHyX7JgPcTWGFfr-5fpKWacxXyaNUWVUs0gizU=6AA42E90"
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
@@ -63,10 +64,20 @@ func main() {
 }
 
 /************************ Authentication set up *******************************/
-func authentication(email string, token string, url string) bool {
+func authentication(email string, token string, url string) (bool, error) {
 
 	// Jira team url
 	jiraURL := url // User's Jira URL
+	
+	if jiraURL == "" {
+		return false, errors.New("empty URL")
+	}
+	if token == "" {
+		return false, errors.New("empty token")
+	}
+	if email == "" {
+		return false, errors.New("empty email")
+	}
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
@@ -74,22 +85,25 @@ func authentication(email string, token string, url string) bool {
 		APIToken: token,
 	}
 
+
 	// Creating Jira client
 	client, err := jira.NewClient(jiraURL, tr.Client())
 	if err != nil {
-		log.Fatalf("Error creating Jira client: %v\n", err)
+		// log.Fatalf("Error creating Jira client: %v\n", err)
+		return false, errors.New("Error creating Jira client")
 
 	}
 
 	// Getting current user to check if authentication was successful
 	user, _, err := client.User.GetCurrentUser(context.Background())
 	if err != nil {
-		log.Printf("Error getting current user: %v\n", err)
-		log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
+		// log.Printf("Error getting current user: %v\n", err)
+		// log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
+		return false, errors.New("Error getting current user")
 	}
 
 	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
-	return true
+	return true, nil
 }
 
 /******************* Gets project data through its name ***********************/
