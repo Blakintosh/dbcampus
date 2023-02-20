@@ -33,6 +33,7 @@ export type HealthSummary = {
  * Primary model for the API request for a project.
  */
 export type SoftwareProject = {
+	id: number,
     name: string
     health: HealthSummary,
     survey: SurveySummary

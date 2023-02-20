@@ -2,6 +2,7 @@
 	import type { HealthSummary, SoftwareProject, SurveyFactor, SurveySummary } from "../models";
 	import BudgetRundown from "./budgetRundown/BudgetRundown.svelte";
 	import HealthRag from "./health/HealthRag.svelte";
+	import Participants from "./participants/Participants.svelte";
 	import Button from "./shared/Button.svelte";
 	import Tile from "./shared/Tile.svelte";
 	import SurveyRundown from "./surveyRundown/SurveyRundown.svelte";
@@ -11,7 +12,7 @@
 	export let survey: SurveySummary;
 </script>
 
-<article class="p-4 shadow-inner flex-grow bg-slate-100 flex">
+<article class="p-4 shadow-inner flex-grow bg-slate-100 flex overflow-y-auto">
 	<section class="flex-grow">
 		<Tile>
 			<h1 class="text-3xl font-serif mb-4">{name}</h1>
@@ -43,6 +44,10 @@
 			<div class="flex-grow">
 				<Tile heading="Project Budget">
 					<BudgetRundown />
+
+					<p class="flex justify-center">
+						<Button label="Update Spend or Budget"/>
+					</p>
 				</Tile>
 			</div>
 		</div>
@@ -61,8 +66,12 @@
 			</p>
 
 		</Tile>
-		<Tile heading="Participants" isDark>
+		<Tile heading="Project Participants" isDark>
+			<Participants/>
 
+			<p class="flex justify-center mt-4">
+				<Button label="Add or Remove Participants"/>
+			</p>
 		</Tile>
 	</section>
 </article>
