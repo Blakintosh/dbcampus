@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Project from "./_project/Project.svelte";
+	import ProjectOverview from "./_project/ProjectOverview.svelte";
 	import { page } from '$app/stores';
 </script>
 
-<Project {...$page.data.projects[0]}/>
+<ProjectOverview {...$page.data.projects[0]}/>

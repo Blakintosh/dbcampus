@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { HealthSummary, SoftwareProject, SurveyFactor, SurveySummary } from "../models";
+	import type { HealthSummary, SoftwareProject, SurveyFactor, SurveySummary } from "../../models";
 	import BudgetRundown from "./budgetRundown/BudgetRundown.svelte";
 	import HealthRag from "./health/HealthRag.svelte";
 	import Participants from "./participants/Participants.svelte";
