@@ -2,7 +2,20 @@
 	import HealthTrafficLight from "./HealthTrafficLight.svelte";
 
 	export let status: string = "unknown";
+	export let message: string = "They didn't tell me anything!";
 </script>
+
+<!--
+	{#if status === "danger"}
+				This project has critical issues that must be dealt with as soon as possible to rescue it.
+			{:else if status === "warning"}
+				This project has issues that may threaten the project's future success unless dealt with.
+			{:else if status === "normal"}
+				This project has no issues present threatening its future success.
+			{:else}
+				We don't have any information on the health of this project.
+			{/if}
+-->
 
 <div class="flex">
 	<HealthTrafficLight {status}/>
@@ -20,15 +33,7 @@
 			{/if}
 		</h1>
 		<p class="text-md">
-			{#if status === "danger"}
-				This project has critical issues that must be dealt with as soon as possible to rescue it.
-			{:else if status === "warning"}
-				This project has issues that may threaten the project's future success unless dealt with.
-			{:else if status === "normal"}
-				This project has no issues present threatening its future success.
-			{:else}
-				We don't have any information on the health of this project.
-			{/if}
+			{message}
 		</p>
 	</div>
 </div>

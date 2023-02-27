@@ -9,9 +9,10 @@
 <script lang="ts">
 	export let heading: string = "";
 	export let isDark: boolean = false;
+	export let tileClass: string = "";
 </script>
 
-<div class="p-4 rounded-md {isDark ? 'bg-slate-600' : 'bg-slate-50'} {isDark ? 'text-slate-50' : 'text-slate-800'} shadow-md m-2">
+<div class="p-4 rounded-md {isDark ? 'bg-slate-600' : 'bg-slate-50'} {isDark ? 'text-slate-50' : 'text-slate-800'} shadow-md m-2 {tileClass}">
 	{#if heading}
 		<h1 class="font-medium text-xl mb-2">{heading}</h1>
 	{/if}
