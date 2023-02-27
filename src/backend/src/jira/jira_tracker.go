@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 	"errors"
-
+	
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 )
 
@@ -60,23 +60,24 @@ func main() {
 		log.Fatalf("Error getting priority of overdue tasks: %v\n", err)
 	}
 	log.Printf("Priority of overdue tasks: %v", priorityOfTasks)
+	
 
 }
 
 /************************ Authentication set up *******************************/
-func authentication(email string, token string, url string) (bool, error) {
+func authentication(email string, token string, url string) (*jira.Client, error) {
 
 	// Jira team url
 	jiraURL := url // User's Jira URL
 	
 	if jiraURL == "" {
-		return false, errors.New("empty URL")
+		return nil, errors.New("empty URL")
 	}
 	if token == "" {
-		return false, errors.New("empty token")
+		return nil, errors.New("empty token")
 	}
 	if email == "" {
-		return false, errors.New("empty email")
+		return nil, errors.New("empty email")
 	}
 
 	// Authentication data, user has to input both email and API token
@@ -90,7 +91,7 @@ func authentication(email string, token string, url string) (bool, error) {
 	client, err := jira.NewClient(jiraURL, tr.Client())
 	if err != nil {
 		// log.Fatalf("Error creating Jira client: %v\n", err)
-		return false, errors.New("Error creating Jira client")
+		return nil, errors.New("Error creating Jira client")
 
 	}
 
@@ -99,11 +100,11 @@ func authentication(email string, token string, url string) (bool, error) {
 	if err != nil {
 		// log.Printf("Error getting current user: %v\n", err)
 		// log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
-		return false, errors.New("Error getting current user")
+		return nil, errors.New("Error getting current user")
 	}
 
 	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
-	return true, nil
+	return client, nil
 }
 
 /******************* Gets project data through its name ***********************/
