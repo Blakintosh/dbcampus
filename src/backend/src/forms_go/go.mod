@@ -3,6 +3,7 @@ module forms_handler
 go 1.19
 
 require (
+	github.com/gookit/config/v2 v2.2.0
 	golang.org/x/oauth2 v0.5.0
 	google.golang.org/api v0.110.0
 )
@@ -15,9 +16,16 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
+	github.com/gookit/color v1.5.2 // indirect
+	github.com/gookit/goutil v0.6.4 // indirect
+	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230209215440-0dfe4f8abfcc // indirect
