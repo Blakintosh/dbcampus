@@ -2,7 +2,7 @@
 	import HealthTrafficLight from "./HealthTrafficLight.svelte";
 
 	export let status: string = "unknown";
-	export let message: string = "They didn't tell me anything!";
+	export let message: string = "No health rating.";
 </script>
 
 <!--
@@ -21,13 +21,14 @@
 	<HealthTrafficLight {status}/>
 
 	<div class="px-4">
+		<h1 class="font-medium text-xl mb-2">Section Health</h1>
 		<h1 class="text-lg">
 			{#if status === "danger"}
 				<span class="text-red-500">Significant issues present.</span>
 			{:else if status === "warning"}
 				<span class="text-amber-500">Issues present.</span>
 			{:else if status === "normal"}
-				<span class="text-green-500">Project is OK.</span>
+				<span class="text-green-500">All looks good.</span>
 			{:else}
 				<span class="text-gray-300">No health rating.</span>
 			{/if}
