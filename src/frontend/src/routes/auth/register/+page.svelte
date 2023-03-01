@@ -21,7 +21,7 @@
                 <button class="bg-slate-600 text-white font-medium text-sm rounded-md p-2 w-full hover:bg-slate-700 duration-75">Register</button>
             </div>
 			<div class="flex flex-col items-center w-full mt-4">
-				<a href="#" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
+				<a href="/auth/login" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
 			</div>
 		</div>
 	</div>

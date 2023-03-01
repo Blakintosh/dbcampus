@@ -5,7 +5,7 @@
 	import HealthRag from "./_project/health/HealthRag.svelte";
 	import Participants from "./_project/participants/Participants.svelte";
 	import ProjectViewLayout from "./_project/ProjectViewLayout.svelte";
-	import Button from "./_project/shared/Button.svelte";
+	import Button from "../../../components/common/SmallButton.svelte";
 	import HeaderTile from "./_project/shared/HeaderTile.svelte";
 	import Tile from "./_project/shared/Tile.svelte";
 	import SurveyRundown from "./_project/surveyRundown/SurveyRundown.svelte";
