@@ -3,7 +3,7 @@
 	import ProjectViewLayout from "../_project/ProjectViewLayout.svelte";
 	import HeaderTile from "../_project/shared/HeaderTile.svelte";
 	import Tile from "../_project/shared/Tile.svelte";
-	import Button from "../_project/shared/Button.svelte";
+	import Button from "../../../../components/common/SmallButton.svelte";
 	import SurveyResult from "../_project/surveyMain/SurveyResult.svelte";
 
 	$: surveys = $page.data.project.surveys;
