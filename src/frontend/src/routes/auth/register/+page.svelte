@@ -1,3 +1,33 @@
+<script lang="ts">
+	import MainButton from "../../../components/common/ActionButton.svelte";
+
+	let username: string = "";
+	let password: string = "";
+    let confirmPassword: string = "";
+
+	let authenticating: boolean = false;
+
+	const register = async () => {
+		authenticating = true;
+		const response = await fetch("/auth/registerPost", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				username: username,
+				password: password,
+			}),
+		});
+
+		const data = await response.json();
+		if (data.status === 200) {
+			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
+		}
+		authenticating = false;
+	};
+</script>
+
 <div class="grid h-[100vh] w-full bg-slate-100 shadow-inner">
 	<div class="place-self-center justify-self-center shadow-md p-4 bg-white rounded-md">
 		<div class="flex flex-col items-center m-4">
@@ -7,18 +37,18 @@
 		<div class="flex flex-col items-center m-4">
             <div class="flex flex-col w-full">
                 <label for="username" class="text-sm font-medium text-slate-600">Username</label>
-                <input type="username" id="username" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
+                <input type="username" id="username" bind:value={username} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
             </div>
             <div class="flex flex-col w-full mt-4">
                 <label for="password" class="text-sm font-medium text-slate-600">Password</label>
-                <input type="password" id="password" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
+                <input type="password" id="password" bind:value={password} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
             </div>
             <div class="flex flex-col w-full mt-4">
                 <label for="password" class="text-sm font-medium text-slate-600">Confirm Password</label>
-                <input type="password" id="password" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
+                <input type="password" id="password" bind:value={confirmPassword} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
             </div>
             <div class="flex flex-col w-full mt-4">
-                <button class="bg-slate-600 text-white font-medium text-sm rounded-md p-2 w-full hover:bg-slate-700 duration-75">Register</button>
+				<MainButton label={authenticating ? "Please wait..." : "Register"} on:click={register} loading={authenticating} />
             </div>
 			<div class="flex flex-col items-center w-full mt-4">
 				<a href="/auth/login" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
