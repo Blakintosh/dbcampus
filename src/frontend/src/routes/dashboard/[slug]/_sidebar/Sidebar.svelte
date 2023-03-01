@@ -6,12 +6,12 @@
 <script lang="ts">
 	import ProjectsDropdown from "./ProjectsDropdown.svelte";
 	import SidebarHeader from "./SidebarHeader.svelte";
-	import type { SoftwareProject } from "../../models";
+	import type { SoftwareProjectSnippet } from "../../models";
 	import ProjectViewSelect from "./ProjectViewSelect.svelte";
 	import ProjectManageSelect from "./ProjectManageSelect.svelte";
 	import SidebarProfileWidget from "./SidebarProfileWidget.svelte";
 
-	export let projects: Array<SoftwareProject> = [];
+	export let projects: Array<SoftwareProjectSnippet> = [];
 </script>
 
 <nav class="w-64 bg-slate-700 text-slate-100 h-full flex-shrink-0 flex flex-col justify-between">

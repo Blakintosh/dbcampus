@@ -8,9 +8,8 @@ export type RagClassification = "unknown" | "normal" | "warning" | "danger";
  */
 export type SurveyFactor = {
     name: string,
-    description: string,
-    satisfaction: number,
-    status: RagClassification
+    question: string,
+    satisfaction: number
 }
 
 /**
@@ -18,7 +17,17 @@ export type SurveyFactor = {
  */
 export type SurveySummary = {
     date: Date,
-    factors: Array<SurveyFactor>
+    factors: Array<SurveyFactor>,
+	suggestions: Array<string>
+}
+
+/**
+ * Sub-model that stores all information on the surveys undertook by this SoftwareProject.
+ */
+export type SoftwareSurveys = {
+	client?: SurveySummary,
+	team?: SurveySummary,
+	health: HealthSummary
 }
 
 /**
@@ -26,7 +35,15 @@ export type SurveySummary = {
  */
 export type HealthSummary = {
     status: RagClassification,
+	message: string,
     issues: number
+}
+
+export type ProjectBudget = {
+	budget: number,
+	spend: number,
+	spendOverTime: Array<number>,
+	health: HealthSummary
 }
 
 /**
@@ -36,5 +53,14 @@ export type SoftwareProject = {
 	id: number,
     name: string
     health: HealthSummary,
-    survey: SurveySummary
+    surveys: SoftwareSurveys,
+	budget: ProjectBudget
 };
+
+/**
+ * Model that saturates the bare minimum properties needed to render the sidebar of available projects.
+ */
+export type SoftwareProjectSnippet = {
+	id: number,
+    name: string
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SurveyFactor } from "../../models";
+	import type { SurveyFactor } from "../../../models";
 	import SurveyItem from "./SurveyItem.svelte";
 
 	export let date: Date;
@@ -7,7 +7,7 @@
 </script>
 
 <div class="mb-4">
-	Last Survey: <span class="ml-1 font-medium">{
+	Last Client Survey: <span class="ml-1 font-medium">{
 		date.toLocaleDateString("en-GB", {
 			year: "numeric",
 			month: "long",

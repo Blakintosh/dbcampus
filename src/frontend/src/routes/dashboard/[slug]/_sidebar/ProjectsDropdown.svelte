@@ -1,13 +1,30 @@
 <script lang="ts">
-	import type { SoftwareProject } from "../../models";
+	import { page } from "$app/stores";
+	import { goto } from "$app/navigation";
+	import type { SoftwareProjectSnippet } from "../../models";
 
-	export let projects: Array<SoftwareProject> = [];
+	export let projects: Array<SoftwareProjectSnippet> = [];
+
+	let projectTarget: number = $page.data.project.id;
+
+	$: urlEnd = $page.url.pathname.split("/").at(-1);
+
+
+	const changeProject = () => {
+		console.log(urlEnd);
+		const destination = urlEnd !== undefined && ["health", "jira", "budget", "surveys"].includes(urlEnd)
+			? `/dashboard/${projectTarget}/${urlEnd}`
+			: `/dashboard/${projectTarget}`;
+		console.log(destination);
+		goto(destination);
+	};
 </script>
 
 <div class="my-2 mb-8">
-	<select class="bg-slate-800 border border-slate-600 rounded-md p-2 text-sm font-medium w-full">
+	<select bind:value={projectTarget} on:change={(e) => changeProject()}
+		class="bg-slate-800 border border-slate-600 rounded-md p-2 text-sm font-medium w-full">
 		{#each projects as project}
-			<option value="{project.name}">
+			<option value="{project.id}">
 				{project.name}
 			</option>
 		{/each}

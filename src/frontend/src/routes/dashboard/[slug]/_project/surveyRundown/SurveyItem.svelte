@@ -2,9 +2,18 @@
 	import RagCircle from "../common/RagCircle.svelte";
 	
 	export let name: string;
-	export let description: string;
 	export let satisfaction: number;
-	export let status: string;
+
+	let status: string;
+	$: {
+		if(satisfaction >= 0.8) {
+			status = "g";
+		} else if(satisfaction >= 0.4) {
+			status = "a";
+		} else {
+			status = "r";
+		}
+	}
 </script>
 
 <li class="flex justify-between w-full items-center border-b bg-slate-100 px-4">
