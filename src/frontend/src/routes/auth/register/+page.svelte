@@ -1,5 +1,8 @@
 <script lang="ts">
 	import MainButton from "../../../components/common/ActionButton.svelte";
+    import AuthenticationView from "../../../components/auth/AuthenticationView.svelte";
+	import TextField from "../../../components/auth/TextField.svelte";
+	import PasswordField from "../../../components/auth/PasswordField.svelte";
 
 	let username: string = "";
 	let password: string = "";
@@ -28,31 +31,25 @@
 	};
 </script>
 
-<div class="grid h-[100vh] w-full bg-slate-100 shadow-inner">
-	<div class="place-self-center justify-self-center shadow-md p-4 bg-white rounded-md">
-		<div class="flex flex-col items-center m-4">
-			<img src="/pitstop_full.png" alt="logo" class="w-96" />
-			<h2 class="text-xl font-medium p-1">Registration</h2>
-		</div>
-		<div class="flex flex-col items-center m-4">
-            <div class="flex flex-col w-full">
-                <label for="username" class="text-sm font-medium text-slate-600">Username</label>
-                <input type="username" id="username" bind:value={username} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-                <label for="password" class="text-sm font-medium text-slate-600">Password</label>
-                <input type="password" id="password" bind:value={password} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-                <label for="password" class="text-sm font-medium text-slate-600">Confirm Password</label>
-                <input type="password" id="password" bind:value={confirmPassword} class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-				<MainButton label={authenticating ? "Please wait..." : "Register"} on:click={register} loading={authenticating} />
-            </div>
-			<div class="flex flex-col items-center w-full mt-4">
-				<a href="/auth/login" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
-			</div>
-		</div>
-	</div>
-</div>
+
+<svelte:head>
+    <title>Register - Pitstop</title>
+</svelte:head>
+
+<AuthenticationView>
+    <span slot="heading" class="w-full text-center">
+        <h2 class="text-xl font-medium p-1">Registration</h2>
+    </span>
+    <span slot="body" class="w-full">
+        <TextField label="Username" name="username" bind:value={username} />
+        <PasswordField label="Password" name="password" bind:value={password} />
+        <PasswordField label="Confirm Password" name="confirmPassword" bind:value={confirmPassword} />
+        
+        <div class="flex flex-col w-full mt-4">
+            <MainButton label={authenticating ? "Registering..." : "Register"} on:click={register} loading={authenticating} />
+        </div>
+        <div class="flex flex-col items-center w-full mt-4">
+            <a href="/auth/login" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
+        </div>
+    </span>
+</AuthenticationView>
