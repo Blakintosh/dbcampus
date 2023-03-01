@@ -3,24 +3,8 @@ from __future__ import print_function
 from apiclient import discovery
 from httplib2 import Http
 from oauth2client import client, file, tools
-
-def createForm(form_service, title):
-
-    NEW_FORM = {
-        "info": {
-            "title": title,
-        }
-    }
-
-def addQuestion(form_service, NEW_QUESTION):
-
-    # Adds the question to the form
-    question_setting = form_service.forms().batchUpdate(formId=result["formId"], body=NEW_QUESTION).execute()
-
-
-    # Prints the result to show the question has been added
-    get_result = form_service.forms().get(formId=result["formId"]).execute()
-    print(get_result)
+import sys
+import json
 
 def createService():
     SCOPES = "https://www.googleapis.com/auth/forms.body"
@@ -37,75 +21,94 @@ def createService():
     
     return form_service
 
-form_service = createService()
-createForm(form_service, "yo wassup")
 
-NEW_QUESTION = {
-    "requests": [{
-        "createItem": {
-            "item": {
-                "title": "In what year did the United States land a mission on the moon?",
-                "questionItem": {
-                    "question": {
-                        "required": True,
-                        "choiceQuestion": {
-                            "type": "RADIO",
-                            "options": [
-                                {"value": "1965"},
-                                {"value": "1967"},
-                                {"value": "1969"},
-                                {"value": "1971"}
-                            ],
-                            "shuffle": True
+def createForm(form_service, title):
+
+    NEW_FORM = {
+        "info": {
+            "title": title,
+        }
+    }
+    form = form_service.forms().create(body=NEW_FORM).execute()
+    return form
+
+
+
+def createScaleQuestion(title):
+    NEW_QUESTION = {
+        "requests": [{
+            "createItem": {
+                "item": {
+                    'title': title,
+                    'questionItem': {
+                        'question': {
+                            'required': True,
+                            'scaleQuestion': {
+                                'low': 1,
+                                'high': 5,
+                                'lowLabel': 'strongly disagree',
+                                'highLabel': 'strongly agree'
+                            }
                         }
                     }
                 },
-            },
-            "location": {
-                "index": 0
+                "location": {
+                    "index": 0
+                }
             }
-        }
-    }]
-}
+        }]
+    }
+    return NEW_QUESTION
 
-addQuestion(NEW_QUESTION)
-
-# # Request body for creating a form
-# NEW_FORM = {
-#     "info": {
-#         "title": "Quickstart form",
-#     }
-# }
-
-# # Request body to add a multiple-choice question
-# NEW_QUESTION = {
-#     "requests": [{
-#         "createItem": {
-#             "item": {
-#                 "title": "In what year did the United States land a mission on the moon?",
-#                 "questionItem": {
-#                     "question": {
-#                         "required": True,
-#                         "choiceQuestion": {
-#                             "type": "RADIO",
-#                             "options": [
-#                                 {"value": "1965"},
-#                                 {"value": "1967"},
-#                                 {"value": "1969"},
-#                                 {"value": "1971"}
-#                             ],
-#                             "shuffle": True
-#                         }
-#                     }
-#                 },
-#             },
-#             "location": {
-#                 "index": 0
-#             }
-#         }
-#     }]
-# }
+def createYNQuestion(title):
+    NEW_QUESTION = {
+        "requests": [{
+            "createItem": {
+                "item": {
+                    'title': title,
+                    'questionItem': {
+                        'question': {
+                            'required': True,
+                            'choiceQuestion': {
+                                'type': 'RADIO',
+                                'options': [{'value': 'yes'}, 
+                                            {'value': 'no'}]
+                            }
+                        }
+                    }     
+                },
+                "location": {
+                    "index": 0
+                }
+            }
+        }]
+    }
+    return NEW_QUESTION
 
 
+def addQuestion(form_service, form, NEW_QUESTION):
+    # Adds the question to the form
+    question_setting = form_service.forms().batchUpdate(formId=form["formId"], body=NEW_QUESTION).execute()
 
-    
+    # Prints the result to show the question has been added
+    get_result = form_service.forms().get(formId=form["formId"]).execute()
+    print(get_result)
+
+
+def main(data):
+    form_service = createService()
+    form = createForm(form_service, "test form")
+    # data = json.loads(data)
+    for _,info in data.items():
+        print()
+        if info[1] == "scale":
+            addQuestion(form_service, form, createScaleQuestion(info[0]))
+        elif info[1] == "choice":
+            addQuestion(form_service, form, createYNQuestion(info[0]))
+
+
+if __name__ == '__main__':
+    data = json.loads(sys.argv.pop())
+    main(data)   
+
+
