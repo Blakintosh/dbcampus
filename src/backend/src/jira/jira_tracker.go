@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"time"
-	"errors"
-	
+
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 )
 
@@ -23,8 +23,8 @@ func main() {
 
 	// Jira team url
 	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "leon.pennington@warwick.ac.uk"
-	token := "ATATT3xFfGF0Z5Lxy5XQoNjI31MzitcRx8IZQ-idkqAnXnQJNIUSXr4eDy0UN7c-e9Ijg-8dN0fZZIFA60WHwWUcwX1uBTwtOzebHajNbc_rk46HIxkg9tzg9Zn-KYKnWx2ntx6YX2PFXhdoeiHyX7JgPcTWGFfr-5fpKWacxXyaNUWVUs0gizU=6AA42E90"
+	email := "Karim.Zeyada@warwick.ac.uk"
+	token := "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
@@ -60,7 +60,6 @@ func main() {
 		log.Fatalf("Error getting priority of overdue tasks: %v\n", err)
 	}
 	log.Printf("Priority of overdue tasks: %v", priorityOfTasks)
-	
 
 }
 
@@ -69,7 +68,7 @@ func authentication(email string, token string, url string) (*jira.Client, error
 
 	// Jira team url
 	jiraURL := url // User's Jira URL
-	
+
 	if jiraURL == "" {
 		return nil, errors.New("empty URL")
 	}
@@ -85,7 +84,6 @@ func authentication(email string, token string, url string) (*jira.Client, error
 		Username: email, // User's Jira email
 		APIToken: token,
 	}
-
 
 	// Creating Jira client
 	client, err := jira.NewClient(jiraURL, tr.Client())
