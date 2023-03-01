@@ -85,6 +85,8 @@ def createYNQuestion(title):
     }
     return NEW_QUESTION
 
+# def createChoiceQuestion()
+
 
 def addQuestion(form_service, form, NEW_QUESTION):
     # Adds the question to the form
@@ -98,7 +100,6 @@ def addQuestion(form_service, form, NEW_QUESTION):
 def main(data):
     form_service = createService()
     form = createForm(form_service, "test form")
-    # data = json.loads(data)
     for _,info in data.items():
         print()
         if info[1] == "scale":
