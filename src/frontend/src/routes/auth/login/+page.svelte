@@ -50,11 +50,13 @@
 		const data = await response.json();
 		if (data.status === 200) {
 			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
-		} else {
+		} else if(data.status === 401) {
             usernameIsError = true;
             passwordIsError = true;
             passwordErrorMessage = "Invalid username and/or password.";
-        }
+        } else if(data.status === 500) {
+			passwordErrorMessage = "Something went wrong on our end. Please try again.";
+		}
 		authenticating = false;
 	};
 </script>
@@ -65,7 +67,7 @@
 
 <AuthenticationView>
     <span slot="heading" class="w-full text-center">
-        <h2 class="text-xl font-medium p-1">Welcome back!</h2>
+        <h2 class="text-lg md:text-xl font-medium p-1">Welcome back!</h2>
         <h3 class="text-xs text-slate-600">Please log in to your account to continue.</h3>
     </span>
     <span slot="body" class="w-full">
@@ -76,7 +78,7 @@
             <MainButton label={authenticating ? "Logging in..." : "Log in"} on:click={login} loading={authenticating} />
         </div>
         <div class="flex flex-col items-center w-full mt-4">
-            <a href="/auth/register" class="text-amber-500 font-medium text-sm underline">Haven't got an account? Register</a>
+            <a href="/auth/register" class="text-amber-500 font-medium text-xs md:text-sm underline">Haven't got an account? Register</a>
         </div>
     </span>
 </AuthenticationView>

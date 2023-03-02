@@ -1,7 +1,7 @@
 <script lang="ts">
     import "/src/app.css";
-	import Sidebar from "./_sidebar/Sidebar.svelte";
-	import type { SoftwareProject } from "../models";
+	import SideNav from "../../../components/dashboard/sidebar/SideNav.svelte";
+	import type { SoftwareProject } from "../../../util/models";
 	import type { LayoutData } from "./$types";
 
 	export let data: LayoutData;
@@ -12,8 +12,10 @@
 	<meta name="description" content="Project overview dashboard.">
 </svelte:head>
 
-<main class="flex max-h-full h-[100vh]">
-	<Sidebar projects={data.availableProjects}/>
+<main class="flex max-h-full h-[100vh] flex-col lg:flex-row">
+	<SideNav projects={data.availableProjects}/>
+
+	<!-- Manage Modal -->
 
 	<slot/>
 </main>

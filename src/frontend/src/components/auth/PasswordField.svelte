@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let label: string;
+	export let label: string;
     export let name: string;
     export let value: string = "";
     export let isError: boolean = false;
@@ -20,7 +20,7 @@
         {/if}
         {label}
     </label>
-    <input type="password" id={name} bind:value={value} class="border rounded-md p-2 mt-1 w-full {isError ? "bg-red-50 border-red-600" : "border-slate-300"}" on:change={resetErrorStatus} />
+    <input type="password" id={name} bind:value={value} class="border rounded-md text-sm md:text-md p-2 mt-1 w-full {isError ? "bg-red-50 border-red-600" : "border-slate-300"}" on:change={resetErrorStatus} />
     <div class="text-xs text-red-600 py-2 h-1">
         {errorMessage}
     </div>

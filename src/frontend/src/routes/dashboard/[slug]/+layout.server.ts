@@ -1,4 +1,4 @@
-import type { SoftwareProject } from "../models";
+import type { SoftwareProject } from "../../../util/models";
 import { error } from "@sveltejs/kit";
 
 // Placeholder
