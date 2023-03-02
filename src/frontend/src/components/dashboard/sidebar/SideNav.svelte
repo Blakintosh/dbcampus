@@ -52,7 +52,7 @@
 <div class="fixed h-full w-full bg-black/30 z-10 backdrop-blur-sm {overlayVisibilityClass}" on:click={toggleSidebar}>
 </div>
 
-<nav class="w-64 flex-shrink-0 bg-slate-50 text-slate-100 h-full min-h-0 max-h-full fixed z-50 lg:relative overflow-y-auto {sidebarVisibilityClass}" on:resize={updateResponsiveView}>
+<nav class="w-64 flex-shrink-0 bg-slate-50 text-slate-100 h-full min-h-0 max-h-full fixed z-40 lg:relative overflow-y-auto {sidebarVisibilityClass}" on:resize={updateResponsiveView}>
 	<div class="sticky top-0 right-0">
 		<button class="text-slate-800 absolute top-1 right-1 lg:hidden" on:click={toggleSidebar}>
 			<svg class="h-6 w-6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">

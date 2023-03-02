@@ -1,5 +1,5 @@
 import type { SoftwareProject } from "../../../util/models";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 
 // Placeholder
 const projects: Array<SoftwareProject> = [
