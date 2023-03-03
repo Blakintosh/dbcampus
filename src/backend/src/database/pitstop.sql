@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS Project;
 CREATE TABLE Project(
     projectID INTEGER(64) PRIMARY KEY NOT NULL,
-    teamManagerID INTEGER(64) NOT NULL,
+    teamManagerID NOT NULL REFERENCES(TeamManager.teamManagerID),
     projSuccess DECIMAL(3,2),
     budget INTEGER(64),
     currentSpend INTEGER(64),
@@ -11,11 +11,6 @@ CREATE TABLE Project(
     deliverFrequency DECIMAL(3,2),
     teamCapability DECIMAL(3,2),
     documentationLevel DECIMAL(3,2),
-    FOREIGN KEY (teamManagerID) REFERENCES TeamManager(teamManagerID),
-    FOREIGN KEY (projectID) REFERENCES TeamMetrics(projectID),
-    FOREIGN KEY (projectID) REFERENCES ClientMetrics(projectID),
-    FOREIGN KEY (projectID) REFERENCES ProjectCode(projectID),
-    FOREIGN KEY (projectID) REFERENCES ProjectRequirements(projectID)
 );
 
 DROP TABLE IF EXISTS TeamMetrics;
