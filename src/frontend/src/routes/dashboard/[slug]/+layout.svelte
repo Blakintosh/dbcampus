@@ -13,7 +13,7 @@
 	<meta name="description" content="Project overview dashboard.">
 </svelte:head>
 
-<ManageProjectModal/>
+<ManageProjectModal visible/>
 
 <main class="flex max-h-full h-[100vh] flex-col lg:flex-row">
 	<SideNav projects={data.availableProjects}/>

@@ -48,13 +48,14 @@
 		});
 
 		const data = await response.json();
-		if (data.status === 200) {
+        console.log(JSON.stringify(data));
+		if (response.status === 200) {
 			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
-		} else if(data.status === 401) {
+		} else if(response.status === 401) {
             usernameIsError = true;
             passwordIsError = true;
             passwordErrorMessage = "Invalid username and/or password.";
-        } else if(data.status === 500) {
+        } else if(response.status === 500) {
 			passwordErrorMessage = "Something went wrong on our end. Please try again.";
 		}
 		authenticating = false;
