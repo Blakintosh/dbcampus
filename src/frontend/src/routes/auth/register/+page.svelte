@@ -60,12 +60,7 @@
 
 		const data = await response.json();
 		if (data.status === 200) {
-			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
-		} else if(data.status === 400) {
-			usernameIsError = true;
-			usernameErrorMessage = "Username is taken.";
-		} else if(data.status === 500) {
-			confirmPasswordErrorMessage = "Something went wrong on our end. Please try again.";
+			alert(`${JSON.stringify(data)}`);
 		}
 		authenticating = false;
 	};
