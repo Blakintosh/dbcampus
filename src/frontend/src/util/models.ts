@@ -64,3 +64,13 @@ export type SoftwareProjectSnippet = {
 	id: number,
     name: string
 }
+
+/**
+ * Categories available for the project management modal.
+ */
+export enum ProjectManageCategory {
+	Budget,
+	Jira,
+	Surveys,
+	Settings
+}
