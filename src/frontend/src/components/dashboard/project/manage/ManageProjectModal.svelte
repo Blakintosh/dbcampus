@@ -4,8 +4,10 @@
 	import { modalCategory, modalVisible } from "../../../../util/stores";
 	import SmallButton from "../../../common/SmallButton.svelte";
 	import ProjectManageSelect from "../../sidebar/ProjectManageSelect.svelte";
+	import UnsavedChanges from "./components/UnsavedChanges.svelte";
 	import ManageModalTab from "./ManageModalTab.svelte";
 	import BudgetProjectSettings from "./sections/BudgetProjectSettings.svelte";
+	import ClientSurveyProjectAction from "./sections/ClientSurveyProjectAction.svelte";
 	import GeneralProjectSettings from "./sections/GeneralProjectSettings.svelte";
 	import ManageProjectSettings from "./sections/ManageProjectSettings.svelte";
 
@@ -32,6 +34,22 @@
                     component: BudgetProjectSettings
                 }
             ],
+			[
+				ProjectManageCategory.ClientSurvey,
+				{
+					category: ProjectManageCategory.ClientSurvey,
+					name: "Issue a Client Survey",
+					component: ClientSurveyProjectAction
+				}
+			],
+			[
+				ProjectManageCategory.TeamSurvey,
+				{
+					category: ProjectManageCategory.TeamSurvey,
+					name: "Issue a Developer Survey",
+					component: ClientSurveyProjectAction
+				}
+			],
             [
                 ProjectManageCategory.Settings,
                 {
@@ -85,10 +103,10 @@
                 <div class="border-b border-slate-600 mt-4">
                     <h1 class="font-medium text-xs mb-2">Actions</h1>
                     <ul class="w-full">
-                        <ManageModalTab label="Issue Client Survey" selected={false} on:click={() => goToCategory(ProjectManageCategory.General)}>
+                        <ManageModalTab label="Issue Client Survey" selected={$modalCategory === ProjectManageCategory.ClientSurvey} on:click={() => goToCategory(ProjectManageCategory.ClientSurvey)}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-3 h-3"><!--! Font Awesome Pro 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
                         </ManageModalTab>
-                        <ManageModalTab label="Issue Developer Survey" selected={false} on:click={() => goToCategory(ProjectManageCategory.Jira)}>
+                        <ManageModalTab label="Issue Developer Survey" selected={$modalCategory === ProjectManageCategory.TeamSurvey} on:click={() => goToCategory(ProjectManageCategory.TeamSurvey)}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="w-3 h-3"><!--! Font Awesome Pro 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z"/></svg>
                         </ManageModalTab>
                     </ul>
@@ -105,21 +123,10 @@
         </div>
     </div>
     <div class="p-6 bg-slate-700/50 grow relative">
-        <h1 class="font-normal text-3xl mb-2">{categoryData?.name}</h1>
+        <h1 class="font-normal text-3xl mb-4">{categoryData?.name}</h1>
         <p class="text-sm">
             <svelte:component this={categoryData?.component} />
         </p>
-        <div class="absolute bottom-8 left-[50%] translate-x-[-50%] w-[80%]">
-            <div class="flex relative bg-slate-800 shadow-lg px-8 py-3 rounded-md border border-slate-700 items-center justify-between w-full animate-fly-in">
-                <div class="flex items-center gap-8 text-md font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-6 h-6 fill-amber-300/90"><!--! Font Awesome Pro 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
-                    <span>You have unsaved changes.</span>
-                </div>
-                <div>
-                    <SmallButton type="secondary" label="Revert Changes"/>
-                    <SmallButton type="primary" label="Save Changes"/>
-                </div>
-            </div>
-        </div>
+		<UnsavedChanges enabled={false}/>
     </div>
 </div>

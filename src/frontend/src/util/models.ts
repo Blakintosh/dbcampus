@@ -72,6 +72,7 @@ export enum ProjectManageCategory {
     General,
 	Budget,
 	Jira,
-	Surveys,
+	ClientSurvey,
+	TeamSurvey,
 	Settings
 }

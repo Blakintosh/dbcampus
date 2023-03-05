@@ -85,7 +85,7 @@ const projects: Array<SoftwareProject> = [
 	},
 	{
 		id: 2,
-		name: "Foobar",
+		name: "Foo",
 		health: {
 			status: "warning",
 			message: "Placeholder",
