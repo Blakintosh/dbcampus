@@ -31,8 +31,8 @@
 				<p class="text-md font-semibold mx-2 uppercase">
 					Actions
 				</p>
-				<p class="flex-grow flex justify-center">
-					<slot name="actionButtons"/>
+				<p class="flex-grow flex justify-center gap-8">
+					<slot name="actionButtons" class="flex gap-8"/>
 				</p>
 			</div>
 		</div>

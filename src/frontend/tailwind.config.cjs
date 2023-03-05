@@ -8,13 +8,24 @@ module.exports = {
 	},
     extend: {
 		animation: {
-			'blinking': 'blink 3s step-end infinite'
+			'blinking': 'blink 3s step-end infinite',
+            'fly-in': 'flyIn 0.25s ease-in'
 		},
 		keyframes: {
 			blink: {
 				'0%, 100%': { "background-color": "rgb(245 158 11)" },
 				'50%': { "background-color": "black" }
-			}
+			},
+            flyIn: {
+                '0%': {
+                    "bottom": "-120px",
+                    "opacity": "0"
+                },
+                "100%": {
+                    "bottom": "0",
+                    "opacity": "1"
+                }
+            }
 		}
 	},
   },

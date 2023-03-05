@@ -11,6 +11,6 @@
 	}
 </script>
 
-<ButtonRoot type={type} buttonClass="duration-75 rounded-sm text-xs font-medium px-3 py-1.5 text-slate-100 mx-4 shadow-md" on:click={handleClick}>
+<ButtonRoot type={type} buttonClass="duration-75 rounded-sm text-xs font-medium px-3 py-1.5 text-slate-100 shadow-md" on:click={handleClick}>
 	{label}
 </ButtonRoot>
