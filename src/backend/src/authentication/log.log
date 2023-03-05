@@ -1,0 +1,2 @@
+2023/03/01 18:58:16 User created!
+2023/03/01 18:58:16 http: superfluous response.WriteHeader call from main.signupPage (psql.go:85)
