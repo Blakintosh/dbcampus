@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Checkbox from "./Checkbox.svelte";
 
-	export let category: string;
+	export let theme: string;
 	export let question: string;
 	export let enabled: boolean = true;
 	// type (is it a 1-5 scale, or a yes/no question)
@@ -17,7 +17,7 @@
 		<Checkbox {enabled} focusable={false}/>
 		<!-- question -->
 		<div class="flex flex-col">
-			<h4 class="font-medium text-lg">{category}</h4>
+			<h4 class="font-medium text-lg">{theme}</h4>
 			<p>{question}</p>
 		</div>
 	</button>

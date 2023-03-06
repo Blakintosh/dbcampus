@@ -10,6 +10,7 @@
 	import ClientSurveyProjectAction from "./sections/ClientSurveyProjectAction.svelte";
 	import GeneralProjectSettings from "./sections/GeneralProjectSettings.svelte";
 	import ManageProjectSettings from "./sections/ManageProjectSettings.svelte";
+	import TeamSurveyProjectAction from "./sections/TeamSurveyProjectAction.svelte";
 
     type ProjectManageTab = {
         category: ProjectManageCategory;
@@ -47,7 +48,7 @@
 				{
 					category: ProjectManageCategory.TeamSurvey,
 					name: "Issue a Developer Survey",
-					component: ClientSurveyProjectAction
+					component: TeamSurveyProjectAction
 				}
 			],
             [
@@ -122,11 +123,11 @@
             </div>
         </div>
     </div>
-    <div class="p-6 bg-slate-700/50 grow relative">
+    <div class="p-6 bg-slate-700/50 grow relative flex flex-col">
         <h1 class="font-normal text-3xl mb-4">{categoryData?.name}</h1>
-        <p class="text-sm">
+        <div class="text-sm overflow-auto grow">
             <svelte:component this={categoryData?.component} />
-        </p>
+        </div>
 		<UnsavedChanges enabled={false}/>
     </div>
 </div>

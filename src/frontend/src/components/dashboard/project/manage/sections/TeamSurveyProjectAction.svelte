@@ -7,8 +7,8 @@
 
     let questions: Array<SurveyQuestion> = [];
 
-    async function getClientSurveyQuestions() {
-		const res = await fetchFromBackend("/getClientSurveyQuestions");
+    async function getTeamSurveyQuestions() {
+		const res = await fetchFromBackend("/getTeamSurveyQuestions");
 		
         questions = await res.json();
         return true;
@@ -16,11 +16,11 @@
 
     $: enabledQuestions = questions.filter(q => q.enabled).length;
 	
-	let promise = getClientSurveyQuestions();
+	let promise = getTeamSurveyQuestions();
 </script>
 <div>
 	<h3 class="font-semibold">
-		Which questions do you want to ask the client?
+		Which questions do you want to ask the development team?
 	</h3>
     <ul class="my-2 border-t border-b border-slate-600 max-h-[28rem] overflow-scroll">
         {#await promise}

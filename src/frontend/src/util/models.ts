@@ -76,3 +76,9 @@ export enum ProjectManageCategory {
 	TeamSurvey,
 	Settings
 }
+
+export type SurveyQuestion = {
+    theme: string,
+    question: string,
+    enabled: boolean
+}
