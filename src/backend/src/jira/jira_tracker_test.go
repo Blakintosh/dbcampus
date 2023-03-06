@@ -1,10 +1,10 @@
-package main
+package jira
 
 import (
-    "testing"
+	"testing"
 	// "net/http"
-    // "os"
-    // "strings"
+	// "os"
+	// "strings"
 	// "fmt"
 )
 
@@ -15,8 +15,8 @@ func TestAuthenticationDummyJira(t *testing.T) {
 	_, err := authentication(email, token, jiraURL)
 
 	if err != nil {
-        t.Fatalf(`error connecting and authenticating to dummy jira. Error: %v`, err)
-    }
+		t.Fatalf(`error connecting and authenticating to dummy jira. Error: %v`, err)
+	}
 }
 
 func TestAuthenticationNoEmail(t *testing.T) {
@@ -25,9 +25,9 @@ func TestAuthenticationNoEmail(t *testing.T) {
 	jiraURL := "https://groupseven.atlassian.net"
 	_, err := authentication(email, token, jiraURL)
 
-	if err == nil{
-        t.Fatalf(`authentication with empty email returns error: %v. wanted error`,err)
-    }
+	if err == nil {
+		t.Fatalf(`authentication with empty email returns error: %v. wanted error`, err)
+	}
 }
 
 func TestAuthenticationNoToken(t *testing.T) {
@@ -36,9 +36,9 @@ func TestAuthenticationNoToken(t *testing.T) {
 	jiraURL := "https://groupseven.atlassian.net"
 	_, err := authentication(email, token, jiraURL)
 
-	if err == nil{
-        t.Fatalf(`authentication with empty token returns error: %v. wanted error`, err)
-    }
+	if err == nil {
+		t.Fatalf(`authentication with empty token returns error: %v. wanted error`, err)
+	}
 }
 
 func TestAuthenticationNoURL(t *testing.T) {
@@ -47,9 +47,9 @@ func TestAuthenticationNoURL(t *testing.T) {
 	jiraURL := ""
 	_, err := authentication(email, token, jiraURL)
 
-	if err == nil{
-        t.Fatalf(`authentication with empty URL returns error: %v. wanted error`, err)
-    }
+	if err == nil {
+		t.Fatalf(`authentication with empty URL returns error: %v. wanted error`, err)
+	}
 }
 
 func TestGetProject(t *testing.T) {
@@ -60,10 +60,10 @@ func TestGetProject(t *testing.T) {
 	client, errAuth := authentication(email, token, jiraURL)
 	project, err := getProject(email, token, jiraURL, projectName, client)
 
-	if errAuth != nil{
-        t.Fatalf(`error authenticating`)
-    }
-	if (err != nil || project == nil){
-        t.Fatalf(`project not found: %v. wanted error`, err)
-    }
+	if errAuth != nil {
+		t.Fatalf(`error authenticating`)
+	}
+	if err != nil || project == nil {
+		t.Fatalf(`project not found: %v. wanted error`, err)
+	}
 }

@@ -1,14 +1,11 @@
-module authenticator
+module authentication
 
-go 1.19
+go 1.20
 
 require (
+	github.com/gorilla/sessions v1.2.1
 	github.com/lib/pq v1.10.7
-	golang.org/x/crypto v0.6.0
+	golang.org/x/crypto v0.7.0
 )
 
-require (
-	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
-	github.com/gorilla/sessions v1.2.1 // indirect
-)
+require github.com/gorilla/securecookie v1.1.1 // indirect
