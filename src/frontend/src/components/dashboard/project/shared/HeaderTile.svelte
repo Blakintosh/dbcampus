@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tile from "./Tile.svelte";
 	import HealthRag from "../health/HealthRag.svelte";
-	import type { HealthSummary } from "../../../models";
+	import type { HealthSummary } from "../../../../util/models";
 
     export let projectName: string = "";
     export let categoryName: string = "";
@@ -12,7 +12,7 @@
 	};
 </script>
 
-<div class="flex col-span-6 h-min">
+<div class="flex col-span-3 md:col-span-4 lg:col-span-6 h-min">
 	<Tile tileClass="flex-grow">
 		<div class="flex justify-between flex-col h-full">
 			<div>
@@ -31,8 +31,8 @@
 				<p class="text-md font-semibold mx-2 uppercase">
 					Actions
 				</p>
-				<p class="flex-grow flex justify-center">
-					<slot name="actionButtons"/>
+				<p class="flex-grow flex justify-center gap-8">
+					<slot name="actionButtons" class="flex gap-8"/>
 				</p>
 			</div>
 		</div>

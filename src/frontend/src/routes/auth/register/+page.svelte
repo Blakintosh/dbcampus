@@ -1,28 +1,90 @@
-<div class="grid h-[100vh] w-full bg-slate-100 shadow-inner">
-	<div class="place-self-center justify-self-center shadow-md p-4 bg-white rounded-md">
-		<div class="flex flex-col items-center m-4">
-			<img src="/pitstop_full.png" alt="logo" class="w-96" />
-			<h2 class="text-xl font-medium p-1">Registration</h2>
-		</div>
-		<div class="flex flex-col items-center m-4">
-            <div class="flex flex-col w-full">
-                <label for="username" class="text-sm font-medium text-slate-600">Username</label>
-                <input type="username" id="username" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-                <label for="password" class="text-sm font-medium text-slate-600">Password</label>
-                <input type="password" id="password" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-                <label for="password" class="text-sm font-medium text-slate-600">Confirm Password</label>
-                <input type="password" id="password" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-            </div>
-            <div class="flex flex-col w-full mt-4">
-                <button class="bg-slate-600 text-white font-medium text-sm rounded-md p-2 w-full hover:bg-slate-700 duration-75">Register</button>
-            </div>
-			<div class="flex flex-col items-center w-full mt-4">
-				<a href="#" class="text-amber-500 font-medium text-sm underline">or go to Log in</a>
-			</div>
-		</div>
-	</div>
-</div>
+<script lang="ts">
+	import MainButton from "../../../components/common/ActionButton.svelte";
+    import AuthenticationView from "../../../components/auth/AuthenticationView.svelte";
+	import TextField from "../../../components/auth/TextField.svelte";
+	import PasswordField from "../../../components/auth/PasswordField.svelte";
+
+	let username: string = "";
+	let password: string = "";
+    let confirmPassword: string = "";
+
+	let usernameIsError = false;
+	let usernameErrorMessage = "";
+
+	let passwordIsError = false;
+	let passwordErrorMessage = "";
+
+	let confirmPasswordIsError = false;
+	let confirmPasswordErrorMessage = "";
+
+	let authenticating: boolean = false;
+
+	const resetAuthErrors = () => {
+        usernameIsError = false;
+        usernameErrorMessage = "";
+        passwordIsError = false;
+        passwordErrorMessage = "";
+		confirmPasswordIsError = false;
+		confirmPasswordErrorMessage = "";
+    }
+
+	const register = async () => {
+        resetAuthErrors();
+        
+        if(username.length === 0) {
+            usernameIsError = true;
+            usernameErrorMessage = "Username is required.";
+            return;
+        } else if(password.length === 0) {
+            passwordIsError = true;
+            passwordErrorMessage = "Password is required.";
+            return;
+        } else if(password !== confirmPassword) {
+            passwordIsError = true;
+			confirmPasswordIsError = true;
+			confirmPasswordErrorMessage = "Passwords do not match.";
+            return;
+        }
+
+		authenticating = true;
+		const response = await fetch("/auth/registerPost", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				username: username,
+				password: password,
+			}),
+		});
+
+		const data = await response.json();
+		if (data.status === 200) {
+			alert(`${JSON.stringify(data)}`);
+		}
+		authenticating = false;
+	};
+</script>
+
+
+<svelte:head>
+    <title>Register - Pitstop</title>
+</svelte:head>
+
+<AuthenticationView>
+    <span slot="heading" class="w-full text-center">
+        <h2 class="text-lg md:text-xl font-medium p-1">Registration</h2>
+    </span>
+    <span slot="body" class="w-full">
+        <TextField label="Username" name="username" bind:value={username} isError={usernameIsError} errorMessage={usernameErrorMessage} />
+        <PasswordField label="Password" name="password" bind:value={password} isError={passwordIsError} errorMessage={passwordErrorMessage} />
+        <PasswordField label="Confirm Password" name="confirmPassword" bind:value={confirmPassword} isError={confirmPasswordIsError} errorMessage={confirmPasswordErrorMessage} />
+        
+        <div class="flex flex-col w-full mt-6">
+            <MainButton label={authenticating ? "Registering..." : "Register"} on:click={register} loading={authenticating} />
+        </div>
+        <div class="flex flex-col items-center w-full mt-4">
+            <a href="/auth/login" class="text-amber-500 font-medium text-xs md:text-sm underline">or go to Log in</a>
+        </div>
+    </span>
+</AuthenticationView>

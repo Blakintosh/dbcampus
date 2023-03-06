@@ -3,7 +3,7 @@
 	The header component for the sidebar of the Pitstop dashboard. Displays the logo and a wave effect below it.
 -->
 
-<div class="bg-slate-50 text-slate-700 pt-4">
+<div class="bg-slate-50 text-slate-700 pt-8 lg:pt-4">
 	<img src="/pitstop_full.png" alt="Pitstop logo" class="mx-auto"/>
 	<h3 class="text-xs text-center font-semibold">Dashboard</h3>
 	

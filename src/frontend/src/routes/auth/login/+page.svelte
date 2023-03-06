@@ -1,31 +1,85 @@
 <script lang="ts">
-	
+	import AuthenticationView from "../../../components/auth/AuthenticationView.svelte";
+	import PasswordField from "../../../components/auth/PasswordField.svelte";
+	import TextField from "../../../components/auth/TextField.svelte";
+    import MainButton from "../../../components/common/ActionButton.svelte";
+
+	let username: string = "";
+	let password: string = "";
+
+    let usernameIsError = false;
+    let usernameErrorMessage = "";
+
+    let passwordIsError = false;
+    let passwordErrorMessage = "";
+
+	let authenticating: boolean = false;
+
+    const resetAuthErrors = () => {
+        usernameIsError = false;
+        usernameErrorMessage = "";
+        passwordIsError = false;
+        passwordErrorMessage = "";
+    }
+
+	const login = async () => {
+        resetAuthErrors();
+        
+        if(username.length === 0) {
+            usernameIsError = true;
+            usernameErrorMessage = "Username is required.";
+            return;
+        } else if(password.length === 0) {
+            passwordIsError = true;
+            passwordErrorMessage = "Password is required.";
+            return;
+        }
+
+		authenticating = true;
+		const response = await fetch("/auth/loginPost", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				username: username,
+				password: password,
+			}),
+		});
+
+		const data = await response.json();
+        console.log(JSON.stringify(data));
+		if (response.status === 200) {
+			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
+		} else if(response.status === 401) {
+            usernameIsError = true;
+            passwordIsError = true;
+            passwordErrorMessage = "Invalid username and/or password.";
+        } else if(response.status === 500) {
+			passwordErrorMessage = "Something went wrong on our end. Please try again.";
+		}
+		authenticating = false;
+	};
 </script>
 
-<div class="grid h-[100vh] w-full bg-slate-100 shadow-inner">
-	<div class="place-self-center justify-self-center shadow-md p-4 bg-white rounded-md">
-		<div class="flex flex-col items-center m-4">
-			<img src="/pitstop_full.png" alt="logo" class="w-96" />
-			<h2 class="text-xl font-medium p-1">Welcome back!</h2>
-			<h3 class="text-xs text-slate-600">Please log in to your account to continue.</h3>
-		</div>
-		<div class="flex flex-col items-center m-4">
-			<form>
-				<div class="flex flex-col w-full">
-					<label for="username" class="text-sm font-medium text-slate-600">Username</label>
-					<input type="username" id="username" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-				</div>
-				<div class="flex flex-col w-full mt-4">
-					<label for="password" class="text-sm font-medium text-slate-600">Password</label>
-					<input type="password" id="password" class="border border-slate-300 rounded-md p-2 mt-1 w-full" />
-				</div>
-				<div class="flex flex-col w-full mt-4">
-					<button class="bg-slate-600 text-white font-medium text-sm rounded-md p-2 w-full hover:bg-slate-700 duration-75">Log in</button>
-				</div>
-			</form>
-			<div class="flex flex-col items-center w-full mt-4">
-				<a href="#" class="text-amber-500 font-medium text-sm underline">Haven't got an account? Register</a>
-			</div>
-		</div>
-	</div>
-</div>
+<svelte:head>
+    <title>Log in - Pitstop</title>
+</svelte:head>
+
+<AuthenticationView>
+    <span slot="heading" class="w-full text-center">
+        <h2 class="text-lg md:text-xl font-medium p-1">Welcome back!</h2>
+        <h3 class="text-xs text-slate-600">Please log in to your account to continue.</h3>
+    </span>
+    <span slot="body" class="w-full">
+        <TextField label="Username" name="username" bind:value={username} isError={usernameIsError} errorMessage={usernameErrorMessage} />
+        <PasswordField label="Password" name="password" bind:value={password} isError={passwordIsError} errorMessage={passwordErrorMessage} />
+        
+        <div class="flex flex-col w-full mt-6">
+            <MainButton label={authenticating ? "Logging in..." : "Log in"} on:click={login} loading={authenticating} />
+        </div>
+        <div class="flex flex-col items-center w-full mt-4">
+            <a href="/auth/register" class="text-amber-500 font-medium text-xs md:text-sm underline">Haven't got an account? Register</a>
+        </div>
+    </span>
+</AuthenticationView>

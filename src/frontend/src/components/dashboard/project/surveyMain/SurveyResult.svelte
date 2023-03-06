@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SurveyFactor } from "../../../models";
+	import type { SurveyFactor } from "../../../../util/models";
 	import SurveyRag from "./SurveyRag.svelte";
 	import SurveyResultRow from "./SurveyResultRow.svelte";
 

@@ -1,5 +1,5 @@
-import type { SoftwareProject } from "../models";
-import { error } from "@sveltejs/kit";
+import type { SoftwareProject } from "../../../util/models";
+import { error, redirect } from "@sveltejs/kit";
 
 // Placeholder
 const projects: Array<SoftwareProject> = [
@@ -85,7 +85,7 @@ const projects: Array<SoftwareProject> = [
 	},
 	{
 		id: 2,
-		name: "Foobar",
+		name: "Foo",
 		health: {
 			status: "warning",
 			message: "Placeholder",

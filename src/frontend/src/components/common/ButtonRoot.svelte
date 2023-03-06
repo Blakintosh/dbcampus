@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
 	export let type: string = "primary";
-	export let label: string = "New";
+    export let buttonClass: string = "";
+    export let disabled: boolean = false;
 
 	// Map the button type to a colour
 	let typeColour = "bg-slate-500";
@@ -34,8 +37,16 @@
 				break;
 		}
 	}
+
+	const dispatch = createEventDispatcher();
+	const handleClick = () => {
+        if(disabled) {
+            return;
+        }
+		dispatch("click");
+	}
 </script>
 
-<button class="{typeColour} {hoverColour} duration-75 rounded-sm text-xs font-medium px-3 py-1.5 text-slate-100 mx-4 shadow-md">
-	{label}
+<button class="{typeColour} duration-75 {buttonClass} {disabled ? "opacity-80" : hoverColour}" on:click={handleClick}>
+	<slot/>
 </button>

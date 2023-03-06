@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
-	import type { SoftwareProjectSnippet } from "../../models";
+	import type { SoftwareProjectSnippet } from "../../../util/models";
 
 	export let projects: Array<SoftwareProjectSnippet> = [];
 
