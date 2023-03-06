@@ -1,8 +1,11 @@
-package main
+package jira
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"http"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -10,57 +13,11 @@ import (
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
 )
 
-func main() {
-
-	/*************** Setting up looger and authentication *********************/
-	// Setting up logger
-	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer logFile.Close()
-	log.SetOutput(logFile)
-
-	// Jira team url
-	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "Karim.Zeyada@warwick.ac.uk"
-	token := "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
-
-	// Authentication data, user has to input both email and API token
-	tr := jira.BasicAuthTransport{
-		Username: email, // User's Jira email
-		APIToken: token,
-	}
-
-	// Creating Jira client
-	client, err := jira.NewClient(jiraURL, tr.Client())
-	if err != nil {
-		log.Fatalf("Error creating Jira client: %v\n", err)
-
-	}
-
-	// Getting current user to check if authentication was successful
-	user, _, err := client.User.GetCurrentUser(context.Background())
-	if err != nil {
-		log.Printf("Error getting current user: %v\n", err)
-		log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
-	}
-	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
-
-	// Getting number of overdue tasks
-	numOverDueTasks, err := getNumOverDueIssuesFromProject(email, token, jiraURL, "PIT", client)
-	if err != nil {
-		log.Fatalf("Error getting number of overdue tasks: %v\n", err)
-	}
-	log.Printf("Number of overdue tasks: %v", numOverDueTasks)
-
-	// Getting priority of overdue tasks
-	priorityOfTasks, err := getPriorities(email, token, jiraURL, "PIT", client)
-	if err != nil {
-		log.Fatalf("Error getting priority of overdue tasks: %v\n", err)
-	}
-	log.Printf("Priority of overdue tasks: %v", priorityOfTasks)
-
+type ProjectData struct {
+	ProjectName string `json:"projectName"` // Name of the project
+	ProjectID   string `json:"projectID"`   // ID of the project
+	NumTasks    int    `json:"numTasks"`    // Number of tasks in the project
+	NumOverdue  int    `json:"numOverdue"`  // Number of overdue tasks in the project
 }
 
 /************************ Authentication set up *******************************/
@@ -120,8 +77,43 @@ func getProject(email string, token string, url string, projectName string, clie
 }
 
 /********************* Getting number of overdue tasks *************************/
-func getNumOverDueIssuesFromProject(email string, token string, url string, projectName string, client *jira.Client) (int, error) {
+func getNumOverDueIssuesFromProject(projectName string) (int, int, error) {
+	/*************** Setting up looger and authentication *********************/
+	// Setting up logger
+	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
+
+	// Jira team url
+	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
+	email := "Karim.Zeyada@warwick.ac.uk"
+	token := "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
+
+	// Authentication data, user has to input both email and API token
+	tr := jira.BasicAuthTransport{
+		Username: email, // User's Jira email
+		APIToken: token,
+	}
+
+	// Creating Jira client
+	client, err := jira.NewClient(jiraURL, tr.Client())
+	if err != nil {
+		log.Fatalf("Error creating Jira client: %v\n", err)
+
+	}
+
+	// Getting current user to check if authentication was successful
+	user, _, err := client.User.GetCurrentUser(context.Background())
+	if err != nil {
+		log.Printf("Error getting current user: %v\n", err)
+		log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
+	}
+	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
 	counter := 0
+	tasks := 0
 
 	// Getting all issues
 	issues, _, err := client.Issue.Search(context.Background(), "project = "+projectName, nil)
@@ -132,6 +124,7 @@ func getNumOverDueIssuesFromProject(email string, token string, url string, proj
 	// Get the deadline of each issue
 	for _, issue := range issues {
 		// Get the deadline
+		tasks++
 		deadline := issue.Fields.Duedate
 		status := issue.Fields.Status.Name
 		deadlineByte, _ := deadline.MarshalJSON()
@@ -144,7 +137,7 @@ func getNumOverDueIssuesFromProject(email string, token string, url string, proj
 		ti, err := time.Parse("2006-01-02", string(deadlineByte))
 		if err != nil {
 			log.Printf("Error parsing time: %v", err)
-			return -1, err
+			return -1, -1, err
 		}
 		deadlineTime := time.Time(ti)
 
@@ -155,7 +148,7 @@ func getNumOverDueIssuesFromProject(email string, token string, url string, proj
 		}
 
 	}
-	return counter, nil
+	return counter, tasks, nil
 }
 
 /**************** Get priorties of all issues in a project ********************/
@@ -179,6 +172,48 @@ func getPriorities(email string, token string, url string, projectName string, c
 	}
 
 	return priorities, nil
+}
+
+func makeProjectData(projectName string, projectID string) *ProjectData {
+	numTasks, numOverdue, err := getNumOverDueIssuesFromProject(projectName)
+	if err != nil {
+		log.Fatalf("Error getting number of overdue tasks: %v", err)
+	}
+	projectData := &ProjectData{
+		ProjectName: projectName,
+		ProjectID:   projectID,
+		NumTasks:    numTasks,
+		NumOverdue:  numOverdue,
+	}
+
+	return projectData
+}
+
+func MakeProjectData(res http.ResponseWriter, req *http.Request) {
+	// Get the project name from the request
+	var projectData *ProjectData
+	if req.Method == "POST" {
+		// Access the request body
+		reqBody, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			log.Println(err)
+		}
+		err = json.Unmarshal([]byte(reqBody), &projectData)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	projectData = makeProjectData(projectData.ProjectName, projectData.ProjectID)
+
+	// Convert the project data to json
+	jsonData, err := json.Marshal(projectData)
+	if err != nil {
+		log.Fatalf("Error converting project data to json: %v", err)
+	}
+	// Send the project data to the frontend
+	res.Header().Set("Content-Type", "application/json")
+	res.Write(jsonData)
 }
 
 /******************** Getting all projects example ************************/

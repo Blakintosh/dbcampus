@@ -102,7 +102,7 @@ def main(data):
     form_service = createService()
     form = createForm(form_service, "test form")
     for _,info in data.items():
-        print()
+        
         if info[1] == "scale":
             addQuestion(form_service, form, createScaleQuestion(info[0], 1, 5, "low", "high"))
         elif info[1] == "choice":
