@@ -7,7 +7,7 @@ export const POST = (async ({ request }) => {
 	const cookie1 = request.headers.get('cookie');
 
 	if(!cookie1) {
-		throw error(500, "NO COOKIE");
+		console.error("NO COOKIE");
 	}
     const response = await fetchFromBackend('login', await request.json());
 
