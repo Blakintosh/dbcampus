@@ -4,6 +4,7 @@ const BACKEND_URL = `http://127.0.0.1:${BACKEND_PORT}`;
 export async function fetchFromBackend(endpoint: string, data?: object): Promise<Response> {
     const response = await fetch(`${BACKEND_URL}/${endpoint}`, {
         method: 'POST',
+		credentials: 'include',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
