@@ -5,7 +5,5 @@ import { fetchFromBackend } from '../../../util/backendService';
 export const POST = (async ({ request }) => {
 	await fetchFromBackend('register', await request.json());
 
-	return json({
-		status: 200
-	});
+	return new Response();
 }) satisfies RequestHandler;
