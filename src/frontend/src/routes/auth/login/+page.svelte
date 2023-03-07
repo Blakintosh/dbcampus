@@ -47,10 +47,9 @@
 			}),
 		});
 
-		const data = await response.json();
-        console.log(JSON.stringify(data));
-		if (response.status === 200) {
-			alert(`Bro this is wild we got a successful response: ${JSON.stringify(data)}`);
+		if (response.status === 200 && response.headers.get("Set-Cookie")) {
+			// does this work? Lmfao
+			document.cookie = response.headers.get("Set-Cookie")!;
 		} else if(response.status === 401) {
             usernameIsError = true;
             passwordIsError = true;
