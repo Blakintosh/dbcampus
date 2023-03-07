@@ -4,6 +4,11 @@ import { error } from '@sveltejs/kit';
 import { fetchFromBackend } from '../../../util/backendService';
 
 export const POST = (async ({ request }) => {
+	const cookie1 = request.headers.get('cookie');
+
+	if(!cookie1) {
+		throw error(500, "NO COOKIE");
+	}
     const response = await fetchFromBackend('login', await request.json());
 
 	const cookie = response.headers.get('set-cookie');
