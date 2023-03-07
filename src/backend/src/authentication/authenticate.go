@@ -1,10 +1,13 @@
 package authentication
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,14 +19,12 @@ import (
 )
 
 /**************************** Entities/Main Objects ***************************/
-
-// Manager data
 type Manager struct {
-	TeammanagerID            int
-	Username                 string
-	Password                 string
-	SessionID                string
-	ManagerSuccessPercentage string
+	TeammanagerID            int    `json:"teammanagerid"`
+	Username                 string `json:"username"`
+	Password                 string `json:"password"`
+	SessionID                string `json:"sessionid"`
+	ManagerSuccessPercentage string `json:"managersuccesspercentage"`
 }
 
 // Project data
@@ -96,28 +97,39 @@ const (
 var store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
 var Psqlconn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
+func CreateSessionID() string {
+	b := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return ""
+	}
+	return base64.URLEncoding.EncodeToString(b)
+}
+
 func SignupPage(res http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
 		fmt.Println("Not a POST request")
+		http.Error(res, "GET request. Should be POST", 500)
 		return
 	}
 
 	var inputtedUser Manager
+	// Access the request body
+	reqBody, err := ioutil.ReadAll(req.Body)
+	fmt.Println("reqBody register: ", string(reqBody))
+	if err != nil {
+		log.Println(err)
+		http.Error(res, "Server error, unable to create your account.", 500)
+	}
+	err = json.Unmarshal([]byte(reqBody), &inputtedUser)
+	if err != nil {
+		log.Println(err)
+		http.Error(res, "Server error, unable to create your account.", 500)
+	}
 
-	if req.Method == "POST" {
-		// Access the request body
-		reqBody, err := ioutil.ReadAll(req.Body)
-		fmt.Println("reqBody register: ", string(reqBody))
-		if err != nil {
-			log.Println(err)
-			http.Error(res, "Server error, unable to create your account.", 500)
-		}
-		err = json.Unmarshal([]byte(reqBody), &inputtedUser)
-		if err != nil {
-			log.Println(err)
-			http.Error(res, "Server error, unable to create your account.", 500)
-		}
-
+	if inputtedUser.Username == "" || inputtedUser.Password == "" {
+		log.Println(err)
+		http.Error(res, "Server error, No username or password.", 500)
+		return
 	}
 
 	db, err := sql.Open("postgres", Psqlconn)
@@ -148,7 +160,6 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 		}
 
 		log.Println("User created!")
-		res.Write([]byte("User created!"))
 		res.WriteHeader(200)
 		return
 	case err != nil:
@@ -161,7 +172,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.WriteHeader(200)
-	json.NewEncoder(res).Encode(inputtedUser)
+	// json.NewEncoder(res).Encode(inputtedUser)
 
 	// if req.Method != "POST" {
 	// 	http.ServeFile(res, req, "signup.html")
@@ -214,19 +225,31 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	err := CheckCookies(res, req)
+	if err == nil {
+		log.Println("User already logged in yes")
+		// change to json
+		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
+		res.WriteHeader(200)
+		return
+	}
+
+	log.Println("User not logged in. Proceeding with login")
 	var inputtedUser Manager
 
-	if req.Method == "POST" {
-		// Access the request body
-		reqBody, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			log.Println(err)
-		}
-		err = json.Unmarshal([]byte(reqBody), &inputtedUser)
-		if err != nil {
-			log.Println(err)
-		}
-
+	// Access the request body
+	reqBody, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	err = json.Unmarshal([]byte(reqBody), &inputtedUser)
+	if err != nil {
+		log.Println(err)
+	}
+	if inputtedUser.Username == "" || inputtedUser.Password == "" {
+		log.Println(err)
+		http.Error(res, "Server error, No username or password.", http.StatusUnauthorized)
+		return
 	}
 
 	// CheckCookies(res, req)
@@ -244,23 +267,23 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	db, err := sql.Open("postgres", Psqlconn)
 	if err != nil {
 		log.Println(err)
-		http.Error(res, "Server error, unable to create your account.", 500)
+		http.Error(res, "Server error. Unable to access database.", 500)
 		return
 	}
 	defer db.Close()
 
 	err = db.QueryRow(`SELECT "username", "password" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
-
 	if err != nil {
 		log.Println(err)
-		res.WriteHeader(401)
+		http.Error(res, "Server error. Unable to access database", 500)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(databasePassword), []byte(inputtedUser.Password))
 	if err != nil {
 		log.Println(err)
-		res.WriteHeader(401)
+		http.Error(res, "Wrong password.", http.StatusUnauthorized)
+
 	}
 
 	log.Printf("User %s logged in\n", inputtedUser.Username)
@@ -268,12 +291,13 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	session, err := store.Get(req, inputtedUser.Username)
 	if err != nil {
 		log.Println(err)
-		http.Error(res, "Server error, unable to create your account.", 500)
+		http.Error(res, "Server error, unable to get session.", 500)
 		return
 	}
 
 	log.Println("session: ", session)
 	// set session values
+	session.ID = CreateSessionID()
 	session.Values["username"] = inputtedUser.Username
 	session.Values["authenticated"] = true
 
@@ -284,9 +308,6 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Server error, unable to store session", 500)
 		return
 	}
-
-	log.Println("session saved")
-
 	// set cookie
 	cookie := http.Cookie{
 		Name:     "SessionID",
@@ -294,7 +315,9 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		Secure:   true,
 		HttpOnly: true,
 		MaxAge:   2628000,
+		SameSite: http.SameSiteStrictMode,
 	}
+	log.Println("cookie: ", cookie)
 	http.SetCookie(res, &cookie)
 	log.Println("cookie set")
 	log.Println("Session ID: ", session.ID)
@@ -309,7 +332,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	// Select the logged in user and return their session ID
 	var sessionID string
-	err = db.QueryRow(`SELECT "sessionID" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
+	err = db.QueryRow(`SELECT "sessionid" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to update session ID.", 500)
@@ -318,13 +341,15 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	log.Println("session ID updated in database")
 
-	res.WriteHeader(200)
 	// json.NewEncoder(res).Encode(inputtedUser)
-	// json.NewEncoder(res).Encode(fmt.Sprintf("Wrote cookie %v with session id %v for user %v", cookie, session.ID, inputtedUser.Username))
+	log.Println("Wrote cookie", cookie, "with session id", session.ID, "for user", inputtedUser.Username)
+	res.WriteHeader(200)
 
 }
 
-func CheckCookies(res http.ResponseWriter, req *http.Request) {
+// if err is nil then the user is logged in so give 301 and redirect to home page
+// if err is not nil then the user is not logged in so give 401 and redirect to login page
+func CheckCookies(res http.ResponseWriter, req *http.Request) error {
 	db, err := sql.Open("postgres", Psqlconn)
 	if err != nil {
 		log.Println(err)
@@ -345,12 +370,15 @@ func CheckCookies(res http.ResponseWriter, req *http.Request) {
 	// session := store.Get()
 	var user string
 
-	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE session=$1`, sessionID).Scan(&user)
+	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&user)
 	if err != nil {
-		log.Println(errors.New("couldn't find a user with the session id specified. Redirect to login"))
+		log.Println("Error checking session: ", err)
 	}
-	res.WriteHeader(200)
-	res.Write([]byte(user))
+	if user != "" {
+		log.Printf("User %s logged in with session id %s. Redirect to dashboard", user, sessionID)
+		return nil
+	}
+	return errors.New("couldn't find a user with the session id specified. Redirect to login")
 }
 
 func DashboardPage(res http.ResponseWriter, req *http.Request) {

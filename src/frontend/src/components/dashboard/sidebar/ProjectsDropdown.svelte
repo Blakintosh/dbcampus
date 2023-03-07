@@ -20,7 +20,7 @@
 	};
 </script>
 
-<div class="my-2 mb-8">
+<div class="my-2 mb-2">
 	<select bind:value={projectTarget} on:change={(e) => changeProject()}
 		class="bg-slate-800 border border-slate-600 rounded-md p-2 text-sm font-medium w-full">
 		{#each projects as project}
