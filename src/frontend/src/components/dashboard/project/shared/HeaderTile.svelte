@@ -28,7 +28,7 @@
 			</div>
 				
 			<div class="flex justify-between items-center">
-				<p class="text-md font-semibold mx-2 uppercase">
+				<p class="hidden md:block text-md font-semibold mx-2 uppercase">
 					Actions
 				</p>
 				<p class="flex-grow flex justify-center gap-8">
