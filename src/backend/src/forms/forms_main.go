@@ -1,4 +1,5 @@
 package main
+
 import(
     "fmt"
 	_ "os"
@@ -10,7 +11,13 @@ import(
 )
 
 func main(){
-	cmd := exec.Command("./dist/test.exe", "yop")
+
+	test:= "{
+		\"function\": \"retrieve\",
+		\"form_id\": \"1eBp4r7shhohOAAi36qpf2Wkbj1QGJsxjmRvbXQXmJs4\"
+	}"
+	
+	cmd := exec.Command("./dist/forms_handler.exe", test)
 	out, err := cmd.Output()
 
 	if err != nil {
