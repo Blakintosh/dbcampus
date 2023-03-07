@@ -9,6 +9,6 @@ export const POST = (async ({ request }) => {
 
     return json({
         status: 200,
-        data: await response.json()
+        // data: await response.json()
     });
 }) satisfies RequestHandler;
