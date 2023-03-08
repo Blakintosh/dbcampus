@@ -16,18 +16,21 @@ CREATE TABLE Project(
     teamManagerID INTEGER NOT NULL REFERENCES TeamManager(teamManagerID),
     projSuccess DECIMAL(3,2),
     budget INTEGER,
+    monthlyExpenses INTEGER,
     currentSpend INTEGER,
     nextDeadline TIMESTAMP,
     finalDeadline TIMESTAMP,
     prevDeadlinesMet INTEGER,
     teamMeanExperience DECIMAL(3,2),
+    weeklyTeamMeetings DECIMAL(3,2),
+    clientMeetingsPerMonth DECIMAL(3,2),
     jiraURL VARCHAR(120)
 );
 
 DROP TABLE IF EXISTS TeamSurveys CASCADE;
 CREATE TABLE TeamSurveys(
     teamMetricsID SERIAL PRIMARY KEY,
-    projectID INTEGER NOT NULL REFERENCES Project(projectID),
+    projectCode VARCHAR(50) UNIQUE NOT NULL REFERENCES Project(projectCode),
     supportFromTopManagement DECIMAL(3,2),
     testingQuality DECIMAL(3,2),
     documentationQuality DECIMAL(3,2),

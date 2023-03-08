@@ -1,6 +1,7 @@
 package equation
 
 import (
+	"connector"
 	"jira"
 	"math"
 	"time"
@@ -57,13 +58,13 @@ func MangerScore(budget float64, deadline time.Time, monthlyExpenses float64, na
 }
 
 // Gets the survey score given the data needed from the database
-func SurveyScore(surveyMean1 float64, surveyMean2 float64, surveyMean3 float64, surveyMean4 float64, surveyMean5 float64, surveyMean6 float64) float64 {
-	supportFromTopManagement := SurveyWeights[0].MaxWeight * (math.Log(surveyMean1) / math.Log(5))
-	testingQuality := SurveyWeights[1].MaxWeight * (math.Log(surveyMean2) / math.Log(5))
-	documentationQuality := SurveyWeights[2].MaxWeight * (math.Log(surveyMean3) / math.Log(5))
-	clarityOfTheRequirements := SurveyWeights[3].MaxWeight * (math.Log(surveyMean4) / math.Log(5))
-	taskTooMuchForTheTeam := SurveyWeights[4].MaxWeight * (math.Log(surveyMean5) / math.Log(5))
-	teamSatisfaction := SurveyWeights[5].MaxWeight * (math.Log(surveyMean6) / math.Log(5))
+func SurveyScore() float64 {
+	supportFromTopManagement := SurveyWeights[0].MaxWeight * (math.Log(SurveyWeights[0].Weight) / math.Log(5))
+	testingQuality := SurveyWeights[1].MaxWeight * (math.Log(SurveyWeights[1].Weight) / math.Log(5))
+	documentationQuality := SurveyWeights[2].MaxWeight * (math.Log(SurveyWeights[2].Weight) / math.Log(5))
+	clarityOfTheRequirements := SurveyWeights[3].MaxWeight * (math.Log(SurveyWeights[3].Weight) / math.Log(5))
+	taskTooMuchForTheTeam := SurveyWeights[4].MaxWeight * (math.Log(SurveyWeights[4].Weight) / math.Log(5))
+	teamSatisfaction := SurveyWeights[5].MaxWeight * (math.Log(SurveyWeights[5].Weight) / math.Log(5))
 	return (supportFromTopManagement + testingQuality + documentationQuality + clarityOfTheRequirements + taskTooMuchForTheTeam + teamSatisfaction)
 }
 
@@ -80,29 +81,67 @@ func budgetScore(budget float64, deadline time.Time, monthlyExpenses float64) fl
 }
 
 // Gets the overdue tasks score given the project name, jira url, email and token
-func overdueTasksScore(name string, jiraUrl string, email string, token string) float64 {
-	overdue, total, err := jira.GetNumOverDueIssuesFromProject(name, jiraUrl, email, token)
+func overdueTasksScore(projectName string, jiraUrl string, email string, token string) float64 {
+	overdue, total, err := jira.GetNumOverDueIssuesFromProject(projectName, jiraUrl, email, token)
 	if err != nil {
 		return 0
 	}
 	return 3*(float64(overdue)/float64(total)) - 2
 }
 
-// func GetPercentage() (float64, error) {
-// 	db, err := connector.ConnectDB()
-// 	if err != nil {
-// 		return -1, err
-// 	}
-// 	defer connector.CloseDB(db)
+func GetPercentage() (float64, error) {
+	db, err := connector.ConnectDB()
+	if err != nil {
+		return -1, err
+	}
+	defer connector.CloseDB(db)
 
-// 	// Manager data
-// 	var managerExperience float64
-// 	var weeklyTeamMeetings float64
-// 	var meanTeamExperience float64
-// 	var clientMeetingsPerMonth float64
-// 	var budget float64
-// 	var overdueTasks float64
+	// Cookie data
+	var username string
+	var projectCode string
 
-// 	// Survey data
+	// Manager data not in ManagerWeights
+	var jiraEmail string
+	var jiraToken string
 
-// }
+	// Project data not in ManagerWeights
+	var budget float64
+	var deadline time.Time
+	var monthlyExpenses float64
+	var jiraUrl string
+	var currentSpending float64
+
+	// Survey data in SurveyWeights
+
+	// Get the data from the database
+	err = db.QueryRow("SELECT managerExperience, jiraEmail, jiraApiToken FROM manager WHERE username=$1", username).
+		Scan(ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
+	if err != nil {
+		return -1, err
+	}
+	err = db.QueryRow("SELECT budget, finalDeadline, monthlyExpenses, jiraURL, teamMeanExperience, currentSpend, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1", projectCode).
+		Scan(ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, ManagerWeights[2].Weight, &currentSpending, ManagerWeights[1].Weight, ManagerWeights[3].Weight)
+	if err != nil {
+		return -1, err
+	}
+	err = db.QueryRow("SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1", projectCode).
+		Scan(SurveyWeights[0].Weight, SurveyWeights[1].Weight, SurveyWeights[2].Weight, SurveyWeights[3].Weight, SurveyWeights[4].Weight, SurveyWeights[5].Weight)
+	if err != nil {
+		return -1, err
+	}
+
+	// Change budget weight and overdue tasks weight depending on the data
+	if ManagerWeights[4].Weight != 0 {
+		ManagerWeights[4].Weight = 1
+	}
+	overdue, _, _ := jira.GetNumOverDueIssuesFromProject(projectCode, jiraUrl, jiraEmail, jiraToken)
+	if overdue != 0 {
+		ManagerWeights[5].Weight = 1
+	}
+
+	// Get data needed from jira and calculate the scores
+	totalScore := (MangerScore(budget, deadline, monthlyExpenses, projectCode, jiraUrl, jiraEmail, jiraToken) +
+		SurveyScore()) / (GetMaxPossibleWeightForInput(ManagerWeights) + GetMaxPossibleWeightForInput(SurveyWeights))
+
+	return totalScore, nil
+}
