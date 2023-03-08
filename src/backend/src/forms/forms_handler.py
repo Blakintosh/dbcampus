@@ -10,7 +10,16 @@ def main(data):
             return createHandler(data)
         elif (data["function"] == "retrieve"):
             # pass
-            return retrieveHandler(data)
+            res = retrieveHandler(data)
+            print(res)
+            
+            #Serializing json
+            json_object = json.dumps(res, indent=4)
+            
+            # Writing to sample.json
+            with open("res.txt", "w") as outfile:
+                outfile.write(json_object)
+            # return json.dumps(res)
         else:
             print("bad json")
             return False

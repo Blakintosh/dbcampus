@@ -1,2 +1,4 @@
-github.com/keegancsmith/shell v0.0.0-20160208231706-ccb53e0c7c5c h1:6wy/0GuTK44yNuZ36eaqww+vWdVrFqByuixpwCczb3M=
-github.com/keegancsmith/shell v0.0.0-20160208231706-ccb53e0c7c5c/go.mod h1:qbjfLhTSXb/4ZbhLyMVBWsgwT3KBdhkYbGGN0qdHHQs=
+github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
+github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
+golang.org/x/sys v0.0.0-20220908164124-27713097b956 h1:XeJjHH1KiLpKGb6lvMiksZ9l0fVUh+AmGcm0nOMEBOY=
+golang.org/x/sys v0.0.0-20220908164124-27713097b956/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
