@@ -6,7 +6,7 @@ CREATE TABLE TeamManager(
     sessionID VARCHAR(120),
     jiraEmail VARCHAR(120),
     jiraApiToken VARCHAR(120),
-    managerExperience DECIMAL(3,2),
+    managerExperience DECIMAL(3,2)
 );
 
 DROP TABLE IF EXISTS Project CASCADE;
@@ -31,12 +31,14 @@ DROP TABLE IF EXISTS TeamSurveys CASCADE;
 CREATE TABLE TeamSurveys(
     teamMetricsID SERIAL PRIMARY KEY,
     projectCode VARCHAR(50) UNIQUE NOT NULL REFERENCES Project(projectCode),
+    surveyLink VARCHAR(120),
+    formID VARCHAR(50) UNIQUE NOT NULL,
     supportFromTopManagement DECIMAL(3,2),
     testingQuality DECIMAL(3,2),
     documentationQuality DECIMAL(3,2),
     clarityOfRequirements DECIMAL(3,2),
     taskTooMuch DECIMAL(3,2),
-    teamSatisfaction DECIMAL(3,2),
+    teamSatisfaction DECIMAL(3,2)
 );
 
 DROP TABLE IF EXISTS Client CASCADE;
@@ -44,16 +46,16 @@ CREATE TABLE Client(
     clientID SERIAL PRIMARY KEY
 );
 
-DROP TABLE IF EXISTS ClientSurveys CASCADE;
-CREATE TABLE ClientSurveys(
-    clientMetricsID SERIAL PRIMARY KEY,
-    clientID INTEGER NOT NULL REFERENCES Client(clientID),
-    projectID INTEGER NOT NULL REFERENCES Project(projectID),
-    currentProductSatisfaction DECIMAL(3,2),
-    scopeSatisfaction DECIMAL(3,2),
-    numberOfMeetings INTEGER,
-    CONSTRAINT unique_client_project UNIQUE (clientID, projectID)
-);
+-- DROP TABLE IF EXISTS ClientSurveys CASCADE;
+-- CREATE TABLE ClientSurveys(
+--     clientMetricsID SERIAL PRIMARY KEY,
+--     clientID INTEGER NOT NULL REFERENCES Client(clientID),
+--     projectID INTEGER NOT NULL REFERENCES Project(projectID),
+--     currentProductSatisfaction DECIMAL(3,2),
+--     scopeSatisfaction DECIMAL(3,2),
+--     numberOfMeetings INTEGER,
+--     CONSTRAINT unique_client_project UNIQUE (clientID, projectID)
+-- );
 
 -- DROP TABLE IF EXISTS ProjectCode CASCADE;
 -- CREATE TABLE ProjectCode(
