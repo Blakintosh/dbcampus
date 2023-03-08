@@ -8,7 +8,7 @@ import json
 
 def createHandler(data):
     form_service = createService()
-    form = createForm(form_service, "test form")
+    form = createForm(form_service, data["title"])
     for x in data["questions"]:
         
         if x["type"] == "scale":
