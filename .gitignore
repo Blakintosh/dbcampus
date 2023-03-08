@@ -1,4 +1,4 @@
-src/backend/src/jira/log.log
+*.log
 src/backend/src/forms_py/token.json
 src/frontend/.svelte-kit/*
 src/frontend/node_modules/*
