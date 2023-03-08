@@ -2,7 +2,7 @@ package main
 
 import (
 	auth "authentication"
-	"database/sql"
+	"connector"
 	"log"
 	"mime"
 	"net/http"
@@ -17,11 +17,11 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	db, err := sql.Open("postgres", auth.Psqlconn)
+	db, err := connector.ConnectDB()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer connector.CloseDB(db)
 
 	err = db.Ping()
 	if err != nil {

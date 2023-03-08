@@ -2,10 +2,7 @@ package jira
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"http"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -46,7 +43,7 @@ func authentication(email string, token string, url string) (*jira.Client, error
 	client, err := jira.NewClient(jiraURL, tr.Client())
 	if err != nil {
 		// log.Fatalf("Error creating Jira client: %v\n", err)
-		return nil, errors.New("Error creating Jira client")
+		return nil, errors.New("error creating Jira client")
 
 	}
 
@@ -55,7 +52,7 @@ func authentication(email string, token string, url string) (*jira.Client, error
 	if err != nil {
 		// log.Printf("Error getting current user: %v\n", err)
 		// log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
-		return nil, errors.New("Error getting current user")
+		return nil, errors.New("error getting current user")
 	}
 
 	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
@@ -77,7 +74,7 @@ func getProject(email string, token string, url string, projectName string, clie
 }
 
 /********************* Getting number of overdue tasks *************************/
-func getNumOverDueIssuesFromProject(projectName string) (int, int, error) {
+func GetNumOverDueIssuesFromProject(projectName string, jiraURL string, email string, token string) (int, int, error) {
 	/*************** Setting up looger and authentication *********************/
 	// Setting up logger
 	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
@@ -88,9 +85,9 @@ func getNumOverDueIssuesFromProject(projectName string) (int, int, error) {
 	log.SetOutput(logFile)
 
 	// Jira team url
-	jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
-	email := "Karim.Zeyada@warwick.ac.uk"
-	token := "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
+	// jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
+	// email := "Karim.Zeyada@warwick.ac.uk"
+	// token := "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
 
 	// Authentication data, user has to input both email and API token
 	tr := jira.BasicAuthTransport{
@@ -174,47 +171,47 @@ func getPriorities(email string, token string, url string, projectName string, c
 	return priorities, nil
 }
 
-func makeProjectData(projectName string, projectID string) *ProjectData {
-	numTasks, numOverdue, err := getNumOverDueIssuesFromProject(projectName)
-	if err != nil {
-		log.Fatalf("Error getting number of overdue tasks: %v", err)
-	}
-	projectData := &ProjectData{
-		ProjectName: projectName,
-		ProjectID:   projectID,
-		NumTasks:    numTasks,
-		NumOverdue:  numOverdue,
-	}
+// func makeProjectData(projectName string, projectID string) *ProjectData {
+// 	numTasks, numOverdue, err := getNumOverDueIssuesFromProject(projectName)
+// 	if err != nil {
+// 		log.Fatalf("Error getting number of overdue tasks: %v", err)
+// 	}
+// 	projectData := &ProjectData{
+// 		ProjectName: projectName,
+// 		ProjectID:   projectID,
+// 		NumTasks:    numTasks,
+// 		NumOverdue:  numOverdue,
+// 	}
 
-	return projectData
-}
+// 	return projectData
+// }
 
-func MakeProjectData(res http.ResponseWriter, req *http.Request) {
-	// Get the project name from the request
-	var projectData *ProjectData
-	if req.Method == "POST" {
-		// Access the request body
-		reqBody, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			log.Println(err)
-		}
-		err = json.Unmarshal([]byte(reqBody), &projectData)
-		if err != nil {
-			log.Println(err)
-		}
-	}
+// func MakeProjectData(res http.ResponseWriter, req *http.Request) {
+// 	// Get the project name from the request
+// 	var projectData *ProjectData
+// 	if req.Method == "POST" {
+// 		// Access the request body
+// 		reqBody, err := ioutil.ReadAll(req.Body)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 		err = json.Unmarshal([]byte(reqBody), &projectData)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 	}
 
-	projectData = makeProjectData(projectData.ProjectName, projectData.ProjectID)
+// 	projectData = makeProjectData(projectData.ProjectName, projectData.ProjectID)
 
-	// Convert the project data to json
-	jsonData, err := json.Marshal(projectData)
-	if err != nil {
-		log.Fatalf("Error converting project data to json: %v", err)
-	}
-	// Send the project data to the frontend
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(jsonData)
-}
+// 	// Convert the project data to json
+// 	jsonData, err := json.Marshal(projectData)
+// 	if err != nil {
+// 		log.Fatalf("Error converting project data to json: %v", err)
+// 	}
+// 	// Send the project data to the frontend
+// 	res.Header().Set("Content-Type", "application/json")
+// 	res.Write(jsonData)
+// }
 
 /******************** Getting all projects example ************************/
 

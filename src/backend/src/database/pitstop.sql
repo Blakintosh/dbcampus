@@ -4,13 +4,15 @@ CREATE TABLE TeamManager(
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(120) NOT NULL,
     sessionID VARCHAR(120),
-    managerCapability DECIMAL(3,2),
-    previousProjectSuccess DECIMAL(3,2)
+    jiraEmail VARCHAR(120),
+    jiraApiToken VARCHAR(120),
+    managerExperience DECIMAL(3,2),
 );
 
 DROP TABLE IF EXISTS Project CASCADE;
 CREATE TABLE Project(
     projectID SERIAL PRIMARY KEY,
+    projectCode VARCHAR(50) UNIQUE NOT NULL,
     teamManagerID INTEGER NOT NULL REFERENCES TeamManager(teamManagerID),
     projSuccess DECIMAL(3,2),
     budget INTEGER,
@@ -18,19 +20,20 @@ CREATE TABLE Project(
     nextDeadline TIMESTAMP,
     finalDeadline TIMESTAMP,
     prevDeadlinesMet INTEGER,
-    teamCapability DECIMAL(3,2),
-    documentationLevel DECIMAL(3,2)
+    teamMeanExperience DECIMAL(3,2),
+    jiraURL VARCHAR(120)
 );
 
-DROP TABLE IF EXISTS TeamMetrics CASCADE;
-CREATE TABLE TeamMetrics(
+DROP TABLE IF EXISTS TeamSurveys CASCADE;
+CREATE TABLE TeamSurveys(
     teamMetricsID SERIAL PRIMARY KEY,
     projectID INTEGER NOT NULL REFERENCES Project(projectID),
-    percievedTaskDifficulty DECIMAL(3,2),
-    projectSatisfaction DECIMAL(3,2),
-    teamMotivation DECIMAL(3,2),
-    teamHappiness DECIMAL(3,2),
-    turnover INTEGER
+    supportFromTopManagement DECIMAL(3,2),
+    testingQuality DECIMAL(3,2),
+    documentationQuality DECIMAL(3,2),
+    clarityOfRequirements DECIMAL(3,2),
+    taskTooMuch DECIMAL(3,2),
+    teamSatisfaction DECIMAL(3,2),
 );
 
 DROP TABLE IF EXISTS Client CASCADE;
@@ -38,8 +41,8 @@ CREATE TABLE Client(
     clientID SERIAL PRIMARY KEY
 );
 
-DROP TABLE IF EXISTS ClientMetrics CASCADE;
-CREATE TABLE ClientMetrics(
+DROP TABLE IF EXISTS ClientSurveys CASCADE;
+CREATE TABLE ClientSurveys(
     clientMetricsID SERIAL PRIMARY KEY,
     clientID INTEGER NOT NULL REFERENCES Client(clientID),
     projectID INTEGER NOT NULL REFERENCES Project(projectID),
@@ -49,29 +52,29 @@ CREATE TABLE ClientMetrics(
     CONSTRAINT unique_client_project UNIQUE (clientID, projectID)
 );
 
-DROP TABLE IF EXISTS ProjectCode CASCADE;
-CREATE TABLE ProjectCode(
-    projectCodeID SERIAL PRIMARY KEY,
-    projectID INTEGER NOT NULL REFERENCES Project(projectID),
-    numberOfLangs INTEGER,
-    reuseLevel DECIMAL(3,2),
-    interfacingLevel DECIMAL(3,2),
-    testQuality DECIMAL(3,2),
-    codeErrorDensity DECIMAL(3,2)
-);
+-- DROP TABLE IF EXISTS ProjectCode CASCADE;
+-- CREATE TABLE ProjectCode(
+--     projectCodeID SERIAL PRIMARY KEY,
+--     projectID INTEGER NOT NULL REFERENCES Project(projectID),
+--     numberOfLangs INTEGER,
+--     reuseLevel DECIMAL(3,2),
+--     interfacingLevel DECIMAL(3,2),
+--     testQuality DECIMAL(3,2),
+--     codeErrorDensity DECIMAL(3,2)
+-- );
 
-DROP TABLE IF EXISTS ProjectRequirements CASCADE;
-CREATE TABLE ProjectRequirements(
-    projectRequirementsID SERIAL PRIMARY KEY,
-    projectID INTEGER NOT NULL REFERENCES Project(projectID),
-    stability DECIMAL(3,2),
-    complexity DECIMAL(3,2),
-    clarity DECIMAL(3,2),
-    dependence DECIMAL(3,2),
-    realisticSchedule DECIMAL(3,2),
-    clearObjectives DECIMAL(3,2),
-    flexiDevEnviro DECIMAL(3,2)
-);
+-- DROP TABLE IF EXISTS ProjectRequirements CASCADE;
+-- CREATE TABLE ProjectRequirements(
+--     projectRequirementsID SERIAL PRIMARY KEY,
+--     projectID INTEGER NOT NULL REFERENCES Project(projectID),
+--     stability DECIMAL(3,2),
+--     complexity DECIMAL(3,2),
+--     clarity DECIMAL(3,2),
+--     dependence DECIMAL(3,2),
+--     realisticSchedule DECIMAL(3,2),
+--     clearObjectives DECIMAL(3,2),
+--     flexiDevEnviro DECIMAL(3,2)
+-- );
 
 
 -- Generate IDs ?
