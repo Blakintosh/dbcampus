@@ -53,7 +53,7 @@ func MangerScore(budget float64, deadline time.Time, monthlyExpenses float64, na
 	clientMeetingsPerMonth := ManagerWeights[3].MaxWeight * (math.Log(math.Min(4, ManagerWeights[3].Weight)) / math.Log(4))
 	budgetScore := ManagerWeights[4].MaxWeight * ((budgetScore(budget, deadline, monthlyExpenses) + 1) / 2)
 	overdueTasks := ManagerWeights[5].MaxWeight * overdueTasksScore(name, jiraUrl, email, token)
-	return (managerExperience + weeklyTeamMeetings + meanTeamExperience + clientMeetingsPerMonth + budgetScore + overdueTasks) / GetMaxPossibleWeightForInput(ManagerWeights)
+	return (managerExperience + weeklyTeamMeetings + meanTeamExperience + clientMeetingsPerMonth + budgetScore + overdueTasks)
 }
 
 // Gets the survey score given the data needed from the database
@@ -64,7 +64,7 @@ func SurveyScore(surveyMean1 float64, surveyMean2 float64, surveyMean3 float64, 
 	clarityOfTheRequirements := SurveyWeights[3].MaxWeight * (math.Log(surveyMean4) / math.Log(5))
 	taskTooMuchForTheTeam := SurveyWeights[4].MaxWeight * (math.Log(surveyMean5) / math.Log(5))
 	teamSatisfaction := SurveyWeights[5].MaxWeight * (math.Log(surveyMean6) / math.Log(5))
-	return (supportFromTopManagement + testingQuality + documentationQuality + clarityOfTheRequirements + taskTooMuchForTheTeam + teamSatisfaction) / GetMaxPossibleWeightForInput(SurveyWeights)
+	return (supportFromTopManagement + testingQuality + documentationQuality + clarityOfTheRequirements + taskTooMuchForTheTeam + teamSatisfaction)
 }
 
 // Gets the budget a score given the monthly expenses, budget and deadline
@@ -87,3 +87,22 @@ func overdueTasksScore(name string, jiraUrl string, email string, token string) 
 	}
 	return 3*(float64(overdue)/float64(total)) - 2
 }
+
+// func GetPercentage() (float64, error) {
+// 	db, err := connector.ConnectDB()
+// 	if err != nil {
+// 		return -1, err
+// 	}
+// 	defer connector.CloseDB(db)
+
+// 	// Manager data
+// 	var managerExperience float64
+// 	var weeklyTeamMeetings float64
+// 	var meanTeamExperience float64
+// 	var clientMeetingsPerMonth float64
+// 	var budget float64
+// 	var overdueTasks float64
+
+// 	// Survey data
+
+// }

@@ -1,6 +1,7 @@
 package authentication
 
 import (
+	"connector"
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
@@ -86,16 +87,7 @@ type ClientMetrics struct {
 	YearlyMeetingNumber float32
 }
 
-const (
-	host     = "localhost"
-	port     = 5433
-	user     = "postgres"
-	password = "root"
-	dbname   = "postgres"
-)
-
 var store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
-var Psqlconn = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 func CreateSessionID() string {
 	b := make([]byte, 32)
@@ -132,13 +124,13 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	db, err := sql.Open("postgres", Psqlconn)
+	db, err := connector.ConnectDB()
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", http.StatusInternalServerError)
 		return
 	}
-	defer db.Close()
+	defer connector.CloseDB(db)
 
 	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&inputtedUser.Username)
 
@@ -225,16 +217,6 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := CheckCookies(res, req)
-	if err == nil {
-		log.Println("User already logged in yes")
-		// change to json
-		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
-		res.WriteHeader(200)
-		return
-	}
-
-	log.Println("User not logged in. Proceeding with login")
 	var inputtedUser Manager
 
 	// Access the request body
@@ -252,6 +234,17 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	err = CheckCookies(res, req, inputtedUser)
+	if err == nil {
+		log.Println("User already logged in yes")
+		// change to json
+		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
+		res.WriteHeader(200)
+		return
+	}
+
+	log.Println("User not logged in. Proceeding with login")
+
 	// CheckCookies(res, req)
 	// if err != nil {
 	// 	log.Println("couldn't find cookie. proceeding with logging in normally")
@@ -264,13 +257,13 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	var databaseUsername string
 	var databasePassword string
 
-	db, err := sql.Open("postgres", Psqlconn)
+	db, err := connector.ConnectDB()
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error. Unable to access database.", 500)
 		return
 	}
-	defer db.Close()
+	defer connector.CloseDB(db)
 
 	err = db.QueryRow(`SELECT "username", "password" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
 	if err != nil {
@@ -310,12 +303,12 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	}
 	// set cookie
 	cookie := http.Cookie{
-		Name:     "SessionID",
+		Name:     inputtedUser.Username,
 		Value:    session.ID,
 		Secure:   true,
 		HttpOnly: true,
 		MaxAge:   2628000,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 	}
 	log.Println("cookie: ", cookie)
 	http.SetCookie(res, &cookie)
@@ -349,17 +342,20 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 // if err is nil then the user is logged in so give 301 and redirect to home page
 // if err is not nil then the user is not logged in so give 401 and redirect to login page
-func CheckCookies(res http.ResponseWriter, req *http.Request) error {
-	db, err := sql.Open("postgres", Psqlconn)
+func CheckCookies(res http.ResponseWriter, req *http.Request, inputtedUser Manager) error {
+	db, err := connector.ConnectDB()
 	if err != nil {
 		log.Println(err)
 	}
-	defer db.Close()
+	defer connector.CloseDB(db)
 
 	var sessionID string
 
+	// Logs number of cookies
+	log.Println("Number of cookies: ", len(req.Cookies()))
+
 	for _, cookie := range req.Cookies() {
-		if cookie.Name == "SessionID" {
+		if cookie.Name == inputtedUser.Username {
 			sessionID = cookie.Value
 			log.Println("Cookie session id: ", cookie.Value)
 		}
