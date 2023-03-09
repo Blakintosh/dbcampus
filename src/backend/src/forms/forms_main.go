@@ -1,4 +1,4 @@
-package main
+package forms
 
 import(
     "fmt"
@@ -9,16 +9,16 @@ import(
     "os/exec"
 	"time"
 	"io/ioutil"
-	_"connector"
+	"connector"
 	"errors"
 	"encoding/json"
 	
 )
-func main(){
-	forms()
-}
+// func main(){
+// 	forms()
+// }
 
-func forms()(error){
+func forms(data string)(error){
 	// db, errdb := connector.ConnectDB()
 	// if (errdb != nil){
 	// 	return errors.New("failed to connect to database")
@@ -27,7 +27,7 @@ func forms()(error){
 	// defer connector.CloseDB(db)
 
 	
-	data := "{\"projectCode\": \"something\",\"function\":\"create\",\"title\":\"survey\",\"questions\":[{\"title\":\"you are happy\",\"type\":\"scale\",\"questionID\":\"1\"},{\"title\":\"how are you doing\",\"type\":\"scale\",\"questionID\":\"2\"}]}"
+	// data := "{\"projectCode\": \"something\",\"function\":\"create\",\"title\":\"survey\",\"questions\":[{\"title\":\"you are happy\",\"type\":\"scale\",\"questionID\":\"1\"},{\"title\":\"how are you doing\",\"type\":\"scale\",\"questionID\":\"2\"}]}"
 	// data := "{\"projectCode\": \"something\",\"function\": \"retrieve\"}"
 	
 	var dat map[string]interface{}
@@ -38,8 +38,11 @@ func forms()(error){
 	
 	if(dat["function"].(string) == "retrieve"){
 		/*get forms id using project code if retrieve else just go ahead*/
-		// form_id := getFormId(dat["projectCode"].(string))
-		form_id :="1eBp4r7shhohOAAi36qpf2Wkbj1QGJsxjmRvbXQXmJs4"
+		form_id, err := getFormId(dat["projectCode"].(string))
+		if (err != nil){
+			return err
+		}
+		// form_id :="1eBp4r7shhohOAAi36qpf2Wkbj1QGJsxjmRvbXQXmJs4"
 		data = "{\"projectCode\": \"something\",\"function\": \"retrieve\",\"form_id\": \"" + fmt.Sprintf("%s",form_id) + "\"}"
 	}
 
@@ -54,11 +57,10 @@ func forms()(error){
 		fmt.Println("ret")
 		fmt.Println(result, dat)
 		
-		// _, err = db.Exec(`INSERT INTO teammanager (username, password) VALUES ($1, $2)`, inputtedUser.Username, hashedPassword)
 		return nil
 
 	} else if (dat["function"].(string) == "create"){
-		// insertForm(result)
+		insertForm(result, dat)
 		fmt.Println("cre")
 		fmt.Println(result)
 		return nil
@@ -68,34 +70,34 @@ func forms()(error){
 	
 }
 
-func insertResults(result map[string]interface{}, dat map[string]interface{})(error){
-	// db, errdb := connector.ConnectDB()
-	// if (errdb != nil){
-		// 	return "", errors.New("failed to connect to database")
-		// }
+func insertResults(result map[string]interface{}, data map[string]interface{})(error){
+	db, errdb := connector.ConnectDB()
+	if (errdb != nil){
+			return errors.New("failed to connect to database")
+		}
 		
-		// _, err = db.Exec(`UPDATE TeamSurveys SET sessionid=$1,  WHERE username=$2`, session.ID, inputtedUser.Username)
-		var err error = nil
-		for k, v := range result { 
+	// _, err = db.Exec(`UPDATE TeamSurveys SET sessionid=$1,  WHERE username=$2`, session.ID, inputtedUser.Username)
+	var err error = nil
+	for k, v := range result { 
 
 			switch k{
 		case "00000001":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET supportFromTopManagement=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET supportFromTopManagement=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set supportFromTopManagement to %f\n", v)
 		case "00000002":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET testingQuality=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET testingQuality=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set testingQuality to %f\n", v)
 		case "00000003":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET documentationQuality=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET documentationQuality=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set documentationQuality to %f\n", v)
 		case "00000004":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET clarityOfRequirements=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET clarityOfRequirements=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set clarityOfRequirements to %f\n", v)
 		case "00000005":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET taskTooMuch=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET taskTooMuch=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set taskTooMuch to %f\n", v)
 		case "00000006":
-			// _, err = db.Exec(`UPDATE TeamSurveys SET teamSatisfaction=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+			_, err = db.Exec(`UPDATE TeamSurveys SET teamSatisfaction=$1  WHERE projectCode=$2`, v, data["projectCode"].(string))
 			fmt.Printf("set teamSatisfaction to %f\n", v)
 		}
 		if (err != nil){
@@ -104,35 +106,43 @@ func insertResults(result map[string]interface{}, dat map[string]interface{})(er
 	}
 
 
-	// connector.CloseDB(db)
+	connector.CloseDB(db)
 
 	return nil
 }
 
-func insertForm(result map[string]interface{}, dat map[string]interface{})(error){
-	// db, errdb := connector.ConnectDB()
-	// if (errdb != nil){
-	// 	return "", errors.New("failed to connect to database")
-	// }
+func insertForm(result map[string]interface{}, data map[string]interface{})(error){
+	db, errdb := connector.ConnectDB()
+	if (errdb != nil){
+		return errors.New("failed to connect to database")
+	}
 
-	// _, err = db.Exec(`UPDATE TeamSurveys SET teamSatisfaction=$1,  WHERE projectCode=$2`, v, data["projectCode"].(string))
+	_, err := db.Exec(`UPDATE TeamSurveys SET formID=$1, surveyLink=$2  WHERE projectCode=$3`, result["form_id"], result["url"], data["projectCode"].(string))
+	
+	if (err != nil){
+		return err
+	}
 
-	// connector.CloseDB(db)
+	connector.CloseDB(db)
 
 	return nil
 }
 
 func getFormId(projectCode string)(string, error){
-	// db, errdb := connector.ConnectDB()
-	// if (errdb != nil){
-	// 	return "", errors.New("failed to connect to database")
-	// }
-	// var form_id string
-	// err = db.QueryRow(`SELECT "formID" from "TeamSurveys" where projectCode = $1`, projectCode).Scan(&form_id)
+	db, errdb := connector.ConnectDB()
+	if (errdb != nil){
+		return "", errors.New("failed to connect to database")
+	}
+	var form_id string
+	err := db.QueryRow(`SELECT "formID" from "TeamSurveys" where projectCode = $1`, projectCode).Scan(&form_id)
 
-	// connector.CloseDB(db)
-	// return form_id,nil
-	return "",nil
+	if (err != nil){
+		return "", err
+	}
+
+	connector.CloseDB(db)
+	return form_id,nil
+	// return "",nil
 }
 
 func getResults(data string)(map[string]interface{}, error){
