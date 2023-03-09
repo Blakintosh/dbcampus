@@ -15,6 +15,8 @@ def createHandler(data):
             addQuestion(form_service, form, createScaleQuestion(x["title"], x["questionID"]))
         elif x["type"] == "choice":
             addQuestion(form_service, form, createYNQuestion(x["title"], x["questionID"]))
+    # print(form)
+    return {"form_id": form["formId"], "url": form["responderUri"]}
 
 def createService():
     SCOPES = "https://www.googleapis.com/auth/forms.body"
@@ -97,7 +99,6 @@ def createYNQuestion(title):
     }
     return NEW_QUESTION
 
-# def createChoiceQuestion()
 
 
 def addQuestion(form_service, form, NEW_QUESTION):
@@ -106,4 +107,4 @@ def addQuestion(form_service, form, NEW_QUESTION):
 
     # Prints the result to show the question has been added
     get_result = form_service.forms().get(formId=form["formId"]).execute()
-    print(get_result)
+    # print(get_result)

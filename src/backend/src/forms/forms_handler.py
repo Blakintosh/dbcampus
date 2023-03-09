@@ -7,7 +7,17 @@ import sys
 def main(data):
     try:
         if (data["function"] == "create"):
-            return createHandler(data)
+            
+            res = createHandler(data)
+            print(res)
+            
+            #Serializing json
+            json_object = json.dumps(res, indent=4)
+            
+            # Writing to sample.json
+            with open("res.json", "w") as outfile:
+                outfile.write(json_object)
+
         elif (data["function"] == "retrieve"):
             # pass
             res = retrieveHandler(data)
@@ -17,12 +27,13 @@ def main(data):
             json_object = json.dumps(res, indent=4)
             
             # Writing to sample.json
-            with open("res.txt", "w") as outfile:
+            with open("res.json", "w") as outfile:
                 outfile.write(json_object)
             # return json.dumps(res)
         else:
             print("bad json")
             return False
+        
     except:
         print("bad json")
         return False
