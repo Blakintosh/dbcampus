@@ -28,6 +28,8 @@ func main() {
 		panic(err.Error())
 	}
 
+	auth.Init()
+
 	mime.AddExtensionType(".js", "application/javascript")
 
 	http.HandleFunc("/register", auth.SignupPage)

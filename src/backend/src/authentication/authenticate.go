@@ -89,6 +89,16 @@ type ClientMetrics struct {
 
 var store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
 
+func Init() {
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Secure:   true,
+	}
+}
+
 func CreateSessionID() string {
 	b := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
@@ -234,7 +244,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = CheckCookies(res, req, inputtedUser)
+	err = HasSessionAlready(res, req, inputtedUser)
 	if err == nil {
 		log.Println("User already logged in yes")
 		// change to json
@@ -281,7 +291,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	log.Printf("User %s logged in\n", inputtedUser.Username)
 	// create a new session if successful
-	session, err := store.Get(req, inputtedUser.Username)
+	session, err := store.Get(req, "session")
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to get session.", 500)
@@ -293,6 +303,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	session.ID = CreateSessionID()
 	session.Values["username"] = inputtedUser.Username
 	session.Values["authenticated"] = true
+	session.Values["sessionId"] = session.ID
 
 	// save session
 	err = session.Save(req, res)
@@ -303,7 +314,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	}
 	// set cookie
 	cookie := http.Cookie{
-		Name:     inputtedUser.Username,
+		Name:     "session_token",
 		Value:    session.ID,
 		Secure:   true,
 		HttpOnly: true,
@@ -311,7 +322,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		SameSite: http.SameSiteNoneMode,
 	}
 	log.Println("cookie: ", cookie)
-	http.SetCookie(res, &cookie)
+	//http.SetCookie(res, &cookie)
 	log.Println("cookie set")
 	log.Println("Session ID: ", session.ID)
 
@@ -342,7 +353,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 // if err is nil then the user is logged in so give 301 and redirect to home page
 // if err is not nil then the user is not logged in so give 401 and redirect to login page
-func CheckCookies(res http.ResponseWriter, req *http.Request, inputtedUser Manager) error {
+func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser Manager) error {
 	db, err := connector.ConnectDB()
 	if err != nil {
 		log.Println(err)
@@ -351,27 +362,27 @@ func CheckCookies(res http.ResponseWriter, req *http.Request, inputtedUser Manag
 
 	var sessionID string
 
-	// Logs number of cookies
-	log.Println("Number of cookies: ", len(req.Cookies()))
-
-	for _, cookie := range req.Cookies() {
-		if cookie.Name == inputtedUser.Username {
-			sessionID = cookie.Value
-			log.Println("Cookie session id: ", cookie.Value)
-		}
-	}
-
 	// Check if there is a session cookie, if so login the user
 	// If the cookie is set, verify the session
 	// session := store.Get()
 	var user string
+
+	session, err := store.Get(req, "session")
+
+	if err != nil || session.Values["authenticated"] == nil {
+		log.Println("Unable to get session: ", err)
+		return errors.New("couldn't find a user with the session id specified. Redirect to login")
+	}
+
+	sessionID = session.Values["sessionId"].(string)
+	log.Println("Session ID: ", sessionID)
 
 	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&user)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 	}
 	if user != "" {
-		log.Printf("User %s logged in with session id %s. Redirect to dashboard", user, sessionID)
+		log.Printf("User %s logged in with session ID %s. Redirect to dashboard", user, sessionID)
 		return nil
 	}
 	return errors.New("couldn't find a user with the session id specified. Redirect to login")
