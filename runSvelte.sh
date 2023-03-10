@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ./src/frontend
+
+if ! [ -d "./node_modules" ] ; then
+    npm install
+fi
+npm run dev
