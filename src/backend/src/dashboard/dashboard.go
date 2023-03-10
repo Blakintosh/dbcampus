@@ -20,11 +20,12 @@ type Manager struct {
 	ManagerSuccessPercentage string `json:"managersuccesspercentage"`
 }
 
-// Project data
-type Project struct {
+// Dashboard data
+type DashboardData struct {
 	ProjectCode            string    `json:"projectCode"`
 	Username               string    `json:"username"`
 	ProjectName            string    `json:"projectName"`
+	ProjectCodes           []string  `json:"projectCodes"`
 	ProjSuccess            float32   `json:"projSuccess"`
 	Budget                 float64   `json:"budget"`
 	MonthlyExpenses        float64   `json:"monthlyExpenses"`
@@ -59,14 +60,16 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	// Get the username from the session cookie
 	session, err := auth.Store.Get(req, "session")
 	if err != nil {
-		log.Println("Error getting session: ", err)
-		http.Error(res, "Error getting session", http.StatusInternalServerError)
+		log.Println("Error getting session. User might not be logged in: ", err)
+		res.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	// Check if the user is logged in
 	if session.Values["username"] == nil || session.Values["authenticated"] != true {
 		log.Println("User is not logged in")
 		http.Error(res, "User is not logged in", http.StatusUnauthorized)
+		return
 	}
 
 	// Get the username from the session cookie
@@ -104,8 +107,6 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Return the project codes as a json
-	res.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(res).Encode(projectCodes)
 	if err != nil {
 		log.Println("Error encoding project codes: ", err)
 		http.Error(res, "Error encoding project codes", http.StatusInternalServerError)
@@ -192,10 +193,11 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	currentSpend := totalBudget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
 
 	// Put all the data we have about the project in a struct
-	project := Project{
+	project := DashboardData{
 		ProjectCode:            projectCode,
 		Username:               username,
 		ProjectName:            projectName,
+		ProjectCodes:           projectCodes,
 		ProjSuccess:            float32(projectSuccess),
 		Budget:                 totalBudget,
 		MonthlyExpenses:        monthlyExpenses,
@@ -209,7 +211,12 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Return the data to the frontend as a JSON
-	json.NewEncoder(res).Encode(project)
+	res.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(res).Encode(project)
+	if err != nil {
+		log.Println("Error encoding project data: ", err)
+		http.Error(res, "Error encoding project data", http.StatusInternalServerError)
+	}
 	res.WriteHeader(http.StatusOK)
 
 }
