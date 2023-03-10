@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
@@ -26,44 +25,6 @@ type Manager struct {
 	Password                 string `json:"password"`
 	SessionID                string `json:"sessionid"`
 	ManagerSuccessPercentage string `json:"managersuccesspercentage"`
-}
-
-// Project data
-type Project struct {
-	ProjectID                int
-	TeamMangerID             string
-	ProjectSuccess           float32
-	Budget                   int64
-	MonthlyOutgoings         int
-	CurrentSpending          int64
-	Deadline                 time.Time
-	NotMetDeadlinePercentage float32
-	TeamCapability           float32
-	DocumentationLevel       float32
-}
-
-/**************************** Code Metrics ************************************/
-
-// Quality of code
-type CodeQuality struct {
-	ProjectID             int
-	NumberOfLanguagesUsed int
-	Reusability           float32
-	Interfacing           float32
-	TestQuality           float32
-	CodeErrorDensity      float32
-}
-
-// Code enviroment
-type CodeEnviroment struct {
-	ProjectID         int
-	Stability         float32
-	Complexity        float32
-	Clarity           float32
-	Dependence        float32
-	Schedule          float32
-	ObjectivesClarity float32
-	DevEnviroment     float32
 }
 
 /**************************** Survey Data *************************************/
@@ -87,10 +48,10 @@ type ClientMetrics struct {
 	YearlyMeetingNumber float32
 }
 
-var store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
+var Store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
 
 func Init() {
-	store.Options = &sessions.Options{
+	Store.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
@@ -246,7 +207,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	err = HasSessionAlready(res, req, inputtedUser)
 	if err == nil {
-		log.Println("User already logged in yes")
+		log.Println("User already logged in")
 		// change to json
 		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
 		res.WriteHeader(200)
@@ -278,7 +239,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	err = db.QueryRow(`SELECT "username", "password" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
 	if err != nil {
 		log.Println(err)
-		http.Error(res, "Server error. Unable to access database", 500)
+		http.Error(res, "Username doesn't exist. You will need to register first", 401)
 		return
 	}
 
@@ -291,7 +252,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	log.Printf("User %s logged in\n", inputtedUser.Username)
 	// create a new session if successful
-	session, err := store.Get(req, "session")
+	session, err := Store.Get(req, "session")
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to get session.", 500)
@@ -367,7 +328,7 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 	// session := store.Get()
 	var user string
 
-	session, err := store.Get(req, "session")
+	session, err := Store.Get(req, "session")
 
 	if err != nil || session.Values["authenticated"] == nil {
 		log.Println("Unable to get session: ", err)

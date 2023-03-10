@@ -2,11 +2,13 @@ package main
 
 import (
 	auth "authentication"
-	"connector"
+	connector "connector"
+	dash "dashboard"
 	"log"
-	"mime"
 	"net/http"
 	"os"
+
+	mux "github.com/gorilla/mux"
 )
 
 func main() {
@@ -30,10 +32,10 @@ func main() {
 
 	auth.Init()
 
-	mime.AddExtensionType(".js", "application/javascript")
+	router := mux.NewRouter()
 
-	http.HandleFunc("/register", auth.SignupPage)
-	http.HandleFunc("/login", auth.LoginPage)
-	http.HandleFunc("/dashboard", auth.DashboardPage)
-	http.ListenAndServe(":8081", nil)
+	router.HandleFunc("/register", auth.SignupPage)
+	router.HandleFunc("/login", auth.LoginPage)
+	router.HandleFunc("/dashboard", dash.DashboardPage)
+	http.ListenAndServe(":8081", router)
 }

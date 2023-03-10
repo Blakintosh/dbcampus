@@ -10,6 +10,7 @@ def retrieveHandler(data):
 
 
 def getResults(form_id):
+    # getting the results given form id
     SCOPES = "https://www.googleapis.com/auth/forms.responses.readonly"
     DISCOVERY_DOC = "https://forms.googleapis.com/$discovery/rest?version=v1"
 
@@ -29,13 +30,13 @@ def getResults(form_id):
 
 def getAverages(result):
     responses = dict()
+    # extract results of questions from recieved json and average
     for x in result["responses"]:
         for k,j in x["answers"].items():
             if k not in responses:
                 responses[k] = 0
             responses[k] += int(j["textAnswers"]["answers"][0]["value"])
-            # print(j,k)
-        # print("\n\n")
+            
 
     for l in responses:
         responses[l] /= len(result["responses"])

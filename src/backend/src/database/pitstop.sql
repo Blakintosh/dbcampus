@@ -6,25 +6,25 @@ CREATE TABLE TeamManager(
     sessionID VARCHAR(120),
     jiraEmail VARCHAR(120),
     jiraApiToken VARCHAR(120),
-    managerExperience DECIMAL(3,2)
+    managerExperience DECIMAL(5,3)
 );
 
 DROP TABLE IF EXISTS Project CASCADE;
 CREATE TABLE Project(
-    projectID SERIAL PRIMARY KEY,
-    projectCode VARCHAR(50) UNIQUE NOT NULL,
-    teamManagerID INTEGER NOT NULL REFERENCES TeamManager(teamManagerID),
+    projectCode VARCHAR(3) UNIQUE NOT NULL,
+    username INTEGER NOT NULL REFERENCES TeamManager(username),
+    projectName VARCHAR(120),
     projSuccess DECIMAL(3,2),
-    budget INTEGER,
-    monthlyExpenses INTEGER,
-    currentSpend INTEGER,
-    nextDeadline TIMESTAMP,
-    finalDeadline TIMESTAMP,
-    prevDeadlinesMet INTEGER,
-    teamMeanExperience DECIMAL(3,2),
-    weeklyTeamMeetings DECIMAL(3,2),
-    clientMeetingsPerMonth DECIMAL(3,2),
+    budget DECIMAL(17,2),
+    monthlyExpenses DECIMAL(17,2),
+    customSpendings DECIMAL(17,2),
+    deadline TIMESTAMP,
+    deadlinesMissed INTEGER,
+    teamMeanExperience DECIMAL(5,3),
+    weeklyTeamMeetings DECIMAL(5,3),
+    clientMeetingsPerMonth DECIMAL(5,3),
     jiraURL VARCHAR(120)
+    PRIMARY KEY (projectCode, username)
 );
 
 DROP TABLE IF EXISTS TeamSurveys CASCADE;

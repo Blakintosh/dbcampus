@@ -47,12 +47,12 @@ func GetMaxPossibleWeightForInput(e []Equation) float64 {
 }
 
 // Gets the manager score given the data needed from the database and jira if available
-func MangerScore(budget float64, deadline time.Time, monthlyExpenses float64, name string, jiraUrl string, email string, token string) float64 {
+func MangerScore(budget float64, deadline time.Time, monthlyExpenses float64, customSpendings float64, name string, jiraUrl string, email string, token string) float64 {
 	managerExperience := ManagerWeights[0].MaxWeight * (math.Log(math.Min(7.9, ManagerWeights[0].Weight)) / math.Log(7.9))
 	weeklyTeamMeetings := ManagerWeights[1].MaxWeight * (math.Log(math.Min(4, ManagerWeights[1].Weight)) / math.Log(4))
 	meanTeamExperience := ManagerWeights[2].MaxWeight * (math.Log(math.Min(4.8, ManagerWeights[2].Weight)) / math.Log(4.8))
 	clientMeetingsPerMonth := ManagerWeights[3].MaxWeight * (math.Log(math.Min(4, ManagerWeights[3].Weight)) / math.Log(4))
-	budgetScore := ManagerWeights[4].MaxWeight * ((budgetScore(budget, deadline, monthlyExpenses) + 1) / 2)
+	budgetScore := ManagerWeights[4].MaxWeight * ((budgetScore(budget, deadline, monthlyExpenses, customSpendings) + 1) / 2)
 	overdueTasks := ManagerWeights[5].MaxWeight * overdueTasksScore(name, jiraUrl, email, token)
 	return (managerExperience + weeklyTeamMeetings + meanTeamExperience + clientMeetingsPerMonth + budgetScore + overdueTasks)
 }
@@ -69,8 +69,8 @@ func SurveyScore() float64 {
 }
 
 // Gets the budget a score given the monthly expenses, budget and deadline
-func budgetScore(budget float64, deadline time.Time, monthlyExpenses float64) float64 {
-	score := budget - (((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses
+func budgetScore(budget float64, deadline time.Time, monthlyExpenses float64, customSpendings float64) float64 {
+	score := budget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
 	if score < 0 {
 		return -1
 	} else if score > 0 {
@@ -81,14 +81,15 @@ func budgetScore(budget float64, deadline time.Time, monthlyExpenses float64) fl
 }
 
 // Gets the overdue tasks score given the project name, jira url, email and token
-func overdueTasksScore(projectName string, jiraUrl string, email string, token string) float64 {
-	overdue, total, err := jira.GetNumOverDueIssuesFromProject(projectName, jiraUrl, email, token)
+func overdueTasksScore(projectCode string, jiraUrl string, email string, token string) float64 {
+	overdue, total, err := jira.GetNumOverDueIssuesFromProject(projectCode, jiraUrl, email, token)
 	if err != nil {
 		return 0
 	}
 	return 3*(float64(overdue)/float64(total)) - 2
 }
 
+// Gets the success percentage given the data provided
 func GetPercentage() (float64, error) {
 	db, err := connector.ConnectDB()
 	if err != nil {
@@ -109,22 +110,22 @@ func GetPercentage() (float64, error) {
 	var deadline time.Time
 	var monthlyExpenses float64
 	var jiraUrl string
-	var currentSpending float64
+	var customSpendings float64
 
 	// Survey data in SurveyWeights
 
 	// Get the data from the database
-	err = db.QueryRow("SELECT managerExperience, jiraEmail, jiraApiToken FROM manager WHERE username=$1", username).
+	err = db.QueryRow(`SELECT "managerExperience", "jiraEmail", "jiraApiToken" FROM "TeamManager" WHERE "username"=$1`, username).
 		Scan(ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
 	if err != nil {
 		return -1, err
 	}
-	err = db.QueryRow("SELECT budget, finalDeadline, monthlyExpenses, jiraURL, teamMeanExperience, currentSpend, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1", projectCode).
-		Scan(ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, ManagerWeights[2].Weight, &currentSpending, ManagerWeights[1].Weight, ManagerWeights[3].Weight)
+	err = db.QueryRow(`SELECT "budget", "deadline", "monthlyExpenses", "jiraURL", "teamMeanExperience", "customSpendings", "weeklyTeamMeetings", "clientMeetingsPerMonth" FROM "project" WHERE "projectCode"=$1`, projectCode).
+		Scan(ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, ManagerWeights[2].Weight, &customSpendings, ManagerWeights[1].Weight, ManagerWeights[3].Weight)
 	if err != nil {
 		return -1, err
 	}
-	err = db.QueryRow("SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1", projectCode).
+	err = db.QueryRow(`SELECT "supportFromTopManagement", "testingQuality", "documentationQuality", "clarityOfRequirements", "taskTooMuch", "teamSatisfaction" FROM "survey" WHERE "projectCode"=$1`, projectCode).
 		Scan(SurveyWeights[0].Weight, SurveyWeights[1].Weight, SurveyWeights[2].Weight, SurveyWeights[3].Weight, SurveyWeights[4].Weight, SurveyWeights[5].Weight)
 	if err != nil {
 		return -1, err
@@ -140,7 +141,7 @@ func GetPercentage() (float64, error) {
 	}
 
 	// Get data needed from jira and calculate the scores
-	totalScore := (MangerScore(budget, deadline, monthlyExpenses, projectCode, jiraUrl, jiraEmail, jiraToken) +
+	totalScore := (MangerScore(budget, deadline, monthlyExpenses, customSpendings, projectCode, jiraUrl, jiraEmail, jiraToken) +
 		SurveyScore()) / (GetMaxPossibleWeightForInput(ManagerWeights) + GetMaxPossibleWeightForInput(SurveyWeights))
 
 	return totalScore, nil
