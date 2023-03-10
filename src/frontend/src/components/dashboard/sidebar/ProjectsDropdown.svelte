@@ -5,7 +5,7 @@
 
 	export let projects: Array<SoftwareProjectSnippet> = [];
 
-	let projectTarget: number = $page.data.project.id;
+	let projectTarget: string = $page.data.project?.id ?? "none";
 
 	$: urlEnd = $page.url.pathname.split("/").at(-1);
 
@@ -27,6 +27,10 @@
 			<option value="{project.id}">
 				{project.name}
 			</option>
+        {:else}
+            <option value="none">
+                No project selected
+            </option>
 		{/each}
 	</select>
 </div>

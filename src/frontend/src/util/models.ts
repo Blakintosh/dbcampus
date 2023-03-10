@@ -82,3 +82,16 @@ export type SurveyQuestion = {
     question: string,
     enabled: boolean
 }
+
+export type IssueSurveyRequest = {
+    projectCode: string,
+    function: string,
+    title: string,
+    questions: Array<IssueSurveyQuestion>
+}
+
+export type IssueSurveyQuestion = {
+    title: string,
+    type: string,
+    questionID: string
+}
