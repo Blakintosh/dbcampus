@@ -11,6 +11,7 @@ import (
 )
 
 /**************************** Entities/Main Objects ***************************/
+// Manager data
 type Manager struct {
 	TeammanagerID            int    `json:"teammanagerid"`
 	Username                 string `json:"username"`
@@ -84,6 +85,31 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Error connecting to database", http.StatusInternalServerError)
 	}
 	defer connector.CloseDB(db)
+
+	// Get the projects that has the same team manager
+	rows, err := db.Query(`SELECT "projectCode" FROM "Project" WHERE "username" = $1`, username)
+	if err != nil {
+		log.Println("Error getting projects: ", err)
+		http.Error(res, "Error getting projects", http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	// Put the project codes in an array
+	for rows.Next() {
+		err := rows.Scan(&projectCodes)
+		if err != nil {
+			log.Println("Error scanning project codes: ", err)
+			http.Error(res, "Error scanning project codes", http.StatusInternalServerError)
+		}
+	}
+
+	// Return the project codes as a json
+	res.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(res).Encode(projectCodes)
+	if err != nil {
+		log.Println("Error encoding project codes: ", err)
+		http.Error(res, "Error encoding project codes", http.StatusInternalServerError)
+	}
 
 	// Get the project name from the database
 	err = db.QueryRow(`SELECT "projectName" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&projectName)
@@ -164,23 +190,6 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	currentSpend := totalBudget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
-
-	// Get the projects that has the same team manager
-	rows, err := db.Query(`SELECT "projectCode" FROM "Project" WHERE "username" = $1`, username)
-	if err != nil {
-		log.Println("Error getting projects: ", err)
-		http.Error(res, "Error getting projects", http.StatusInternalServerError)
-	}
-	defer rows.Close()
-
-	// Put the project codes in an array
-	for rows.Next() {
-		err := rows.Scan(&projectCodes)
-		if err != nil {
-			log.Println("Error scanning project codes: ", err)
-			http.Error(res, "Error scanning project codes", http.StatusInternalServerError)
-		}
-	}
 
 	// Put all the data we have about the project in a struct
 	project := Project{
