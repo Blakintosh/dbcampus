@@ -78,7 +78,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	var inputtedUser Manager
 	// Access the request body
 	reqBody, err := ioutil.ReadAll(req.Body)
-	fmt.Println("reqBody register: ", string(reqBody))
+	log.Println("reqBody register: ", string(reqBody))
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", 500)

@@ -11,7 +11,7 @@ CREATE TABLE TeamManager(
 
 DROP TABLE IF EXISTS Project CASCADE;
 CREATE TABLE Project(
-    projectCode VARCHAR(3) UNIQUE NOT NULL,
+    projectCode VARCHAR(3) NOT NULL,
     username INTEGER NOT NULL REFERENCES TeamManager(username),
     projectName VARCHAR(120),
     projSuccess DECIMAL(3,2),
