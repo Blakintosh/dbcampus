@@ -12,7 +12,7 @@ CREATE TABLE TeamManager(
 DROP TABLE IF EXISTS Project CASCADE;
 CREATE TABLE Project(
     projectCode VARCHAR(3) NOT NULL,
-    username INTEGER NOT NULL REFERENCES TeamManager(username),
+    username VARCHAR(50) NOT NULL REFERENCES TeamManager(username),
     projectName VARCHAR(120),
     projSuccess DECIMAL(3,2),
     budget DECIMAL(17,2),
@@ -23,7 +23,7 @@ CREATE TABLE Project(
     weeklyTeamMeetings DECIMAL(5,3),
     clientMeetingsPerMonth DECIMAL(5,3),
     jiraProjectCode VARCHAR(120),
-    jiraURL VARCHAR(120)
+    jiraURL VARCHAR(120),
     PRIMARY KEY (projectCode, username)
 );
 

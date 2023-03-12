@@ -128,7 +128,6 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	case err != nil:
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", http.StatusUnauthorized)
-		return
 	default:
 		fmt.Println("User already exists")
 
@@ -347,13 +346,6 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 		return nil
 	}
 	return errors.New("couldn't find a user with the session id specified. Redirect to login")
-}
-
-func DashboardPage(res http.ResponseWriter, req *http.Request) {
-	// Run the dashboard on svelte.js
-	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "*")
-
 }
 
 // func getProjectDataForUser(username string)
