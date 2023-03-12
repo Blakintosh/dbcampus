@@ -50,7 +50,7 @@ export type ProjectBudget = {
  * Primary model for the API request for a project.
  */
 export type SoftwareProject = {
-	id: number,
+	code: string,
     name: string
     health: HealthInformation,
     surveys: SoftwareSurveys,
@@ -61,7 +61,7 @@ export type SoftwareProject = {
  * Model that saturates the bare minimum properties needed to render the sidebar of available projects.
  */
 export type SoftwareProjectSnippet = {
-	id: number,
+	code: string,
     name: string
 }
 
