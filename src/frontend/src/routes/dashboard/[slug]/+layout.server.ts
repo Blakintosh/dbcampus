@@ -211,8 +211,10 @@ export const load = (async (event) => {
         },
     });
 
-    if(availableProjectsResponse.status === 500) {
+    if(availableProjectsResponse.status === 401) {
         throw redirect(301, "/auth/login");
+    } else if(availableProjectsResponse.status === 500) {
+        throw error(500, "Unable to contact the backend. Please try again later.");
     }
 
     const availableProjects = await availableProjectsResponse.json();
