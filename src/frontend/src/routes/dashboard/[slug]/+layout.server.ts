@@ -228,6 +228,6 @@ export const load = (async (event) => {
 		// Selected project
 		project: await getProject(event.params.slug),
 		// All available projects
-		availableProjects: await availableProjects
+		availableProjects: availableProjects
 	};
 });
