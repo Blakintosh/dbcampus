@@ -53,6 +53,7 @@ func forms(data string)(error){
 	}
 		
 	if (dat["function"].(string) == "retrieve"){
+		// if retrieving results, send them to the database
 		insertResults(result, dat)	
 		fmt.Println("ret")
 		fmt.Println(result, dat)
@@ -60,6 +61,7 @@ func forms(data string)(error){
 		return nil
 
 	} else if (dat["function"].(string) == "create"){
+		// if creating a form, send the required data to the database
 		insertForm(result, dat)
 		fmt.Println("cre")
 		fmt.Println(result)
@@ -73,11 +75,11 @@ func forms(data string)(error){
 func insertResults(result map[string]interface{}, data map[string]interface{})(error){
 	db, errdb := connector.ConnectDB()
 	if (errdb != nil){
-			return errors.New("failed to connect to database")
-		}
+		return errors.New("failed to connect to database")
+	}
 		
-	// _, err = db.Exec(`UPDATE TeamSurveys SET sessionid=$1,  WHERE username=$2`, session.ID, inputtedUser.Username)
 	var err error = nil
+	// updating fields specified by question id
 	for k, v := range result { 
 
 			switch k{
