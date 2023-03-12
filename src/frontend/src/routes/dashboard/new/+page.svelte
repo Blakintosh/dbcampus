@@ -56,7 +56,7 @@
         creatingProject = true;
         stage = 5;
 
-        const response = await fetch("/api/createProject", {
+        const response = await fetch("/api/dashboard/createProject", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
