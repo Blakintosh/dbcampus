@@ -19,10 +19,10 @@ CREATE TABLE Project(
     monthlyExpenses DECIMAL(17,2),
     customSpendings DECIMAL(17,2),
     deadline TIMESTAMP,
-    deadlinesMissed INTEGER,
     teamMeanExperience DECIMAL(5,3),
     weeklyTeamMeetings DECIMAL(5,3),
     clientMeetingsPerMonth DECIMAL(5,3),
+    jiraProjectCode VARCHAR(120),
     jiraURL VARCHAR(120)
     PRIMARY KEY (projectCode, username)
 );

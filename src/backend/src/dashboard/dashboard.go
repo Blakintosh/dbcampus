@@ -5,6 +5,8 @@ import (
 	"connector"
 	"encoding/json"
 	"equation"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -35,6 +37,24 @@ type DashboardData struct {
 	TeamMeanExperience     float64   `json:"teamMeanExperience"`
 	WeeklyTeamMeetings     float64   `json:"weeklyTeamMeetings"`
 	ClientMeetingsPerMonth float64   `json:"clientMeetingsPerMonth"`
+	JiraURL                string    `json:"jiraURL"`
+}
+
+// Dashboard data
+type ProjectData struct {
+	ProjectCode            string    `json:"projectCode"`
+	ProjectName            string    `json:"projectName"`
+	Budget                 float64   `json:"budget"`
+	MonthlyExpenses        float64   `json:"monthlyExpenses"`
+	CustomSpendings        float64   `json:"customSpendings"`
+	Deadline               time.Time `json:"deadline"`
+	ManagerExperience      float64   `json:"managerExperience"`
+	TeamMeanExperience     float64   `json:"teamMeanExperience"`
+	WeeklyTeamMeetings     float64   `json:"weeklyTeamMeetings"`
+	ClientMeetingsPerMonth float64   `json:"clientMeetingsPerMonth"`
+	JiraProjectID          string    `json:"jiraProjectID"`
+	JiraEmail              string    `json:"jiraUsername"`
+	JiraApiToken           string    `json:"jiraApiToken"`
 	JiraURL                string    `json:"jiraURL"`
 }
 
@@ -119,20 +139,29 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
 	}
 
-	// Get the project success rate from the database
-	err = db.QueryRow(`SELECT "projSuccess" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&projectSuccess)
+	// // Get the project success rate from the database
+	// err = db.QueryRow(`SELECT "projSuccess" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&projectSuccess)
+	// if err != nil {
+	// 	log.Println("Error getting project success rate: ", err)
+	// 	http.Error(res, "No project with that project code", http.StatusInternalServerError)
+	// }
+	// if projectSuccess == 0 {
+
+	// Decided to claculate the project success rate every time the user opens the dashboard
+	log.Println("Project success rate wasn't calculated before")
+	projectSuccess, err = equation.GetPercentage(username, projectCode)
 	if err != nil {
-		log.Println("Error getting project success rate: ", err)
-		http.Error(res, "No project with that project code", http.StatusInternalServerError)
+		log.Println("Error calculating project success rate: ", err)
+		http.Error(res, "Error calculating project success rate", http.StatusInternalServerError)
 	}
-	if projectSuccess == 0 {
-		log.Println("Project success rate wasn't calculated before")
-		projectSuccess, err = equation.GetPercentage()
-		if err != nil {
-			log.Println("Error calculating project success rate: ", err)
-			http.Error(res, "Error calculating project success rate", http.StatusInternalServerError)
-		}
+	// Update the project success rate in the database
+	_, err = db.Exec(`UPDATE "Project" SET "projSuccess" = $1 WHERE "projectCode" = $2 AND "username" = $3`, projectSuccess, projectCode, username)
+	if err != nil {
+		log.Println("Error updating project success rate: ", err)
+		http.Error(res, "Error updating project success rate", http.StatusInternalServerError)
 	}
+
+	// }
 
 	// Get the total budget from the database
 	err = db.QueryRow(`SELECT "budget" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&totalBudget)
@@ -219,4 +248,39 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 	res.WriteHeader(http.StatusOK)
 
+}
+
+// CreateProject creates a new project in the database
+func CreateProject(res http.ResponseWriter, req *http.Request) {
+	// Receive the data from the frontend using json
+	var project ProjectData
+	// Access the request body
+	reqBody, err := ioutil.ReadAll(req.Body)
+	fmt.Println("reqBody register: ", string(reqBody))
+	if err != nil {
+		log.Println(err)
+		http.Error(res, "Server error, unable to read input.", 500)
+	}
+	err = json.Unmarshal([]byte(reqBody), &project)
+	if err != nil {
+		log.Println(err)
+		http.Error(res, "Server error, unable to read input.", 500)
+	}
+
+	// Connect to the database
+	db, err := connector.ConnectDB()
+	if err != nil {
+		log.Println("Error connecting to the database: ", err)
+		http.Error(res, "Error connecting to the database", http.StatusInternalServerError)
+	}
+	defer connector.CloseDB(db)
+
+	// Put the project data in the database
+	_, err = db.Exec(`INSERT INTO "Project" ("projectCode", "username", "projectName", "budget", "monthlyExpenses", "customSpendings", "deadline", "teamMeanExperience", "weeklyTeamMeetings", "clientMeetingsPerMonth","jiraProjectCode", "jiraURL") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, project.ProjectCode, project.ProjectName, project.Budget, project.MonthlyExpenses, project.CustomSpendings, project.Deadline, project.TeamMeanExperience, project.WeeklyTeamMeetings, project.ClientMeetingsPerMonth, project.JiraProjectID, project.JiraURL)
+	if err != nil {
+		log.Println("Error inserting project data: ", err)
+		http.Error(res, "Error inserting project data", http.StatusInternalServerError)
+	}
+
+	res.WriteHeader(http.StatusOK)
 }
