@@ -5,10 +5,9 @@
 
 	export let projects: Array<SoftwareProjectSnippet> = [];
 
-	let projectTarget: string = $page.data.project?.id ?? "none";
+	let projectTarget: string = $page.data.project?.code ?? "none";
 
 	$: urlEnd = $page.url.pathname.split("/").at(-1);
-
 
 	const changeProject = () => {
 		console.log(urlEnd);
@@ -24,7 +23,7 @@
 	<select bind:value={projectTarget} on:change={(e) => changeProject()}
 		class="bg-slate-800 border border-slate-600 rounded-md p-2 text-sm font-medium w-full">
 		{#each projects as project}
-			<option value="{project.id}">
+			<option value="{project.code}">
 				{project.name}
 			</option>
         {:else}

@@ -48,6 +48,7 @@
 	<PageHeading section="Dashboard" title="View Project" />
 </div>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="fixed h-full w-full bg-black/30 z-10 backdrop-blur-sm {overlayVisibilityClass}" on:click={toggleSidebar}>
 </div>
 
