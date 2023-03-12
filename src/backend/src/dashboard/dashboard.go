@@ -43,13 +43,12 @@ type ProjectData struct {
 	CustomSpendings        float64   `json:"customSpendings"`
 	BudgetSpent            float64   `json:"budgetSpent"`
 	Deadline               time.Time `json:"deadline"`
-	ManagerExperience      float64   `json:"managerExperience"`
 	TeamMeanExperience     float64   `json:"teamMeanExperience"`
 	WeeklyTeamMeetings     float64   `json:"weeklyTeamMeetings"`
 	ClientMeetingsPerMonth float64   `json:"clientMeetingsPerMonth"`
 	JiraProjectID          string    `json:"jiraProjectID"`
 	JiraEmail              string    `json:"jiraUsername"`
-	JiraApiToken           string    `json:"jiraApiToken"`
+	JiraApiToken           string    `json:jiraApiToken`
 	JiraURL                string    `json:"jiraURL"`
 }
 
@@ -65,7 +64,6 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	var customSpendings float64
 	var deadline time.Time
 	var monthlyExpenses float64
-	var managerExperience float64
 	var teamMeanExperience float64
 	var weeklyTeamMeetings float64
 	var clientMeetingsPerMonth float64
@@ -105,14 +103,14 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	defer connector.CloseDB(db)
 
 	// Get the project name from the database
-	err = db.QueryRow(`SELECT "projectName" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&projectName)
+	err = db.QueryRow(`SELECT projectName FROM Project WHERE projectCode = $1 AND username = $2`, projectCode, username).Scan(&projectName)
 	if err != nil {
 		log.Println("Error getting project name: ", err)
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
 	}
 
 	// // Get the project success rate from the database
-	// err = db.QueryRow(`SELECT "projSuccess" FROM "Project" WHERE "projectCode" = $1 AND "username" = $2`, projectCode, username).Scan(&projectSuccess)
+	// err = db.QueryRow(`SELECT projSuccess FROM Project WHERE projectCode = $1 AND username = $2`, projectCode, username).Scan(&projectSuccess)
 	// if err != nil {
 	// 	log.Println("Error getting project success rate: ", err)
 	// 	http.Error(res, "No project with that project code", http.StatusInternalServerError)
@@ -127,7 +125,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Error calculating project success rate", http.StatusInternalServerError)
 	}
 	// Update the project success rate in the database
-	_, err = db.Exec(`UPDATE "Project" SET "projSuccess" = $1 WHERE "projectCode" = $2 AND "username" = $3`, projectSuccess, projectCode, username)
+	_, err = db.Exec(`UPDATE Project SET projSuccess = $1 WHERE projectCode = $2 AND username = $3`, projectSuccess, projectCode, username)
 	if err != nil {
 		log.Println("Error updating project success rate: ", err)
 		http.Error(res, "Error updating project success rate", http.StatusInternalServerError)
@@ -141,17 +139,16 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 					"projectName",
 					"budget",
 					"customSpendings",
-					"monthlyExpenses",
+					"monthlyExpenses"
 					"deadline",
-					"managerExperience",
 					"teamMeanExperience",
 					"weeklyTeamMeetings",
 					"clientMeetingsPerMonth",
 					"jiraProjectCode",
 					"jiraURL"
-				FROM "Project"
-				WHERE "projectCode" = $1 AND "username" = $2;`, projectCode, username).
-		Scan(&projectName, &totalBudget, &customSpendings, &monthlyExpenses, &deadline, &managerExperience, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectID, &jiraURL)
+				FROM Project
+				WHERE projectCode = $1 AND username = $2;`, projectCode, username).
+		Scan(&projectName, &totalBudget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectID, &jiraURL)
 	if err != nil {
 		log.Println("Error getting project data: ", err)
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
@@ -171,7 +168,6 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		CustomSpendings:        customSpendings,
 		BudgetSpent:            currentSpend,
 		Deadline:               deadline,
-		ManagerExperience:      managerExperience,
 		TeamMeanExperience:     teamMeanExperience,
 		WeeklyTeamMeetings:     weeklyTeamMeetings,
 		ClientMeetingsPerMonth: clientMeetingsPerMonth,
@@ -217,7 +213,7 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	log.Println("Session ID: ", sessionID)
 
 	// Get the username from the session
-	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE sessionid=$1`, sessionID).Scan(&username)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE sessionid=$1`, sessionID).Scan(&username)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 		http.Error(res, "Error getting username", http.StatusInternalServerError)
@@ -329,7 +325,7 @@ func CreateProject(res http.ResponseWriter, req *http.Request) {
 	sessionID := session.Values["sessionId"].(string)
 	log.Println("Session ID: ", sessionID)
 
-	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE sessionID=$1`, sessionID).Scan(&username)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE sessionID=$1`, sessionID).Scan(&username)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 	}

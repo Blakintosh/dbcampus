@@ -51,7 +51,7 @@
 
 <div class="border border-slate-400 p-4 my-2 bg-slate-300 rounded-lg">
     <h2 class="text-sm font-semibold">The following settings are global - change them with caution.</h2>
-    <FormTextField label="What's your Jira email?" placeholder="Email" name="jiraEmail" bind:value={$newProjectData.jiraEmail} error={jiraEmailError}/>
+    <FormTextField label="What's your Jira email?" placeholder="Email" name=jiraEmail bind:value={$newProjectData.jiraEmail} error={jiraEmailError}/>
 
     <FormTextField label="What's your Jira API key?" placeholder="API Key" name="jiraApiKey" bind:value={$newProjectData.jiraApiToken} error={jiraApiTokenError}/>
 </div>

@@ -153,7 +153,7 @@ func getFormId(projectCode string) (string, error) {
 		return "", errors.New("failed to connect to database")
 	}
 	var form_id string
-	err := db.QueryRow(`SELECT "formID" from "TeamSurveys" where projectCode = $1`, projectCode).Scan(&form_id)
+	err := db.QueryRow(`SELECT formID from "TeamSurveys" where projectCode = $1`, projectCode).Scan(&form_id)
 
 	if err != nil {
 		return "", err

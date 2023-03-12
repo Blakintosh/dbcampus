@@ -102,7 +102,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer connector.CloseDB(db)
 
-	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE username=$1`, inputtedUser.Username).Scan(&inputtedUser.Username)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&inputtedUser.Username)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -113,7 +113,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		_, err = db.Exec(`INSERT INTO "TeamManager" (username, password) VALUES ($1, $2)`, inputtedUser.Username, hashedPassword)
+		_, err = db.Exec(`INSERT INTO TeamManager (username, password) VALUES ($1, $2)`, inputtedUser.Username, hashedPassword)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Server error, unable to create your account.", http.StatusUnauthorized)
@@ -151,7 +151,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	// }
 	// defer db.Close()
 
-	// err = db.QueryRow(`SELECT "username" FROM "users" WHERE username=$1`, username).Scan(&user)
+	// err = db.QueryRow(`SELECT username FROM "users" WHERE username=$1`, username).Scan(&user)
 
 	// switch {
 	// case err == sql.ErrNoRows:
@@ -232,7 +232,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer connector.CloseDB(db)
 
-	err = db.QueryRow(`SELECT "username", "password" FROM "TeamManager" WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
+	err = db.QueryRow(`SELECT username, password FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Username doesn't exist. You will need to register first", 401)
@@ -284,7 +284,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	log.Println("Session ID: ", session.ID)
 
 	// update database with session
-	_, err = db.Exec(`UPDATE "TeamManager" SET "sessionID"=$1 WHERE username=$2`, session.ID, inputtedUser.Username)
+	_, err = db.Exec(`UPDATE TeamManager SET sessionID=$1 WHERE username=$2`, session.ID, inputtedUser.Username)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to update session ID.", 500)
@@ -293,7 +293,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	// Select the logged in user and return their session ID
 	var sessionID string
-	err = db.QueryRow(`SELECT "sessionID" FROM "TeamManager" WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
+	err = db.QueryRow(`SELECT sessionID FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to update session ID.", 500)
@@ -334,7 +334,7 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 	sessionID = session.Values["sessionId"].(string)
 	log.Println("Session ID: ", sessionID)
 
-	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE "sessionID"=$1`, sessionID).Scan(&user)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE sessionID=$1`, sessionID).Scan(&user)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 	}

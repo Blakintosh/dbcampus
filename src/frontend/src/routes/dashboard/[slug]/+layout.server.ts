@@ -210,7 +210,7 @@ export const load = (async (event) => {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            "projectCode": event.params.slug
+            projectCode: event.params.slug
         })
     });
 
