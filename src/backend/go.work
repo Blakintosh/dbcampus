@@ -6,4 +6,6 @@ use (
     src/equation
     src/database_connector
     src/forms
+    src/dashboard
+    .
 )
