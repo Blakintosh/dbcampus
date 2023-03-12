@@ -111,17 +111,17 @@ func GetPercentage(username string, projectCode string) (float64, error) {
 
 	// Get the data from the database
 	err = db.QueryRow(`SELECT managerExperience, jiraEmail, jiraApiToken FROM TeamManager WHERE username=$1`, username).
-		Scan(ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
+		Scan(&ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
 	if err != nil {
 		return -1, err
 	}
 	err = db.QueryRow(`SELECT budget, deadline, monthlyExpenses, jiraURL, teamMeanExperience, customSpendings, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1`, projectCode).
-		Scan(ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, ManagerWeights[2].Weight, &customSpendings, ManagerWeights[1].Weight, ManagerWeights[3].Weight)
+		Scan(&ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, &ManagerWeights[2].Weight, &customSpendings, &ManagerWeights[1].Weight, &ManagerWeights[3].Weight)
 	if err != nil {
 		return -1, err
 	}
 	err = db.QueryRow(`SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1`, projectCode).
-		Scan(SurveyWeights[0].Weight, SurveyWeights[1].Weight, SurveyWeights[2].Weight, SurveyWeights[3].Weight, SurveyWeights[4].Weight, SurveyWeights[5].Weight)
+		Scan(&SurveyWeights[0].Weight, &SurveyWeights[1].Weight, &SurveyWeights[2].Weight, &SurveyWeights[3].Weight, &SurveyWeights[4].Weight, &SurveyWeights[5].Weight)
 	if err != nil {
 		return -1, err
 	}
