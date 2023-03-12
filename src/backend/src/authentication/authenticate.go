@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -70,7 +69,7 @@ func CreateSessionID() string {
 
 func SignupPage(res http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
-		fmt.Println("Not a POST request")
+		log.Println("Not a POST request")
 		http.Error(res, "GET request. Should be POST", 500)
 		return
 	}
@@ -108,7 +107,6 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	switch {
 	case err == sql.ErrNoRows:
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(inputtedUser.Password), bcrypt.DefaultCost)
-		fmt.Println("hashedPassword: ", hashedPassword)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Server error, unable to create your account.", 500)
@@ -129,7 +127,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", http.StatusUnauthorized)
 	default:
-		fmt.Println("User already exists")
+		log.Println("User already exists")
 
 	}
 
@@ -210,7 +208,6 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 		// change to json
 		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
 		res.WriteHeader(200)
-		return
 	}
 
 	log.Println("User not logged in. Proceeding with login")

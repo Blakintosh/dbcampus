@@ -3,11 +3,13 @@ package dashboard
 import (
 	auth "authentication"
 	"connector"
+	"database/sql"
 	"encoding/json"
 	"equation"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -187,6 +189,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	var projectCodes []string
 	var projectNames []string
+	var projects []ProjectData
 	var username string
 
 	// Connect to the database
@@ -216,8 +219,20 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get the project codes from the database
-	rows, err := db.Query(`SELECT "projectCode", "projectName" FROM "Project" WHERE "username" = $1`, username)
+	rows, err := db.Query(`SELECT projectCode, projectName FROM Project WHERE username = $1`, username)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("No projects found for user: ", username)
+			// encode the empty struct to JSON
+			res.Header().Set("Content-Type", "application/json")
+			err = json.NewEncoder(res).Encode(projects)
+			if err != nil {
+				log.Println("Error encoding project data: ", err)
+				http.Error(res, "Error encoding project data", http.StatusInternalServerError)
+			}
+			res.WriteHeader(http.StatusOK)
+
+		}
 		log.Println("Error getting project codes: ", err)
 		http.Error(res, "Error getting project codes", http.StatusInternalServerError)
 	}
@@ -236,12 +251,13 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// for each project code and name, add it to the struct
-	var projects []ProjectData
 	for i := 0; i < len(projectCodes); i++ {
 		projects = append(projects, ProjectData{
 			ProjectCode: projectCodes[i],
 			ProjectName: projectNames[i],
 		})
+		log.Println("Project code: ", projectCodes[i])
+		log.Println("Project name: ", projectNames[i])
 	}
 
 	// Return the data to the frontend as a JSON
@@ -251,6 +267,7 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		log.Println("Error encoding project data: ", err)
 		http.Error(res, "Error encoding project data to json", http.StatusInternalServerError)
 	}
+	log.Println("Successfully sent project data to frontend. " + strconv.Itoa(len(projects)) + " projects found.")
 	res.WriteHeader(http.StatusOK)
 }
 
