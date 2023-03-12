@@ -136,16 +136,16 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	// Execute the query
 	err = db.QueryRow(`
 				SELECT
-					"projectName",
-					"budget",
-					"customSpendings",
-					"monthlyExpenses"
-					"deadline",
-					"teamMeanExperience",
-					"weeklyTeamMeetings",
-					"clientMeetingsPerMonth",
-					"jiraProjectCode",
-					"jiraURL"
+					projectName,
+					budget,
+					customSpendings,
+					monthlyExpenses
+					deadline,
+					teamMeanExperience,
+					weeklyTeamMeetings,
+					clientMeetingsPerMonth,
+					jiraProjectCode,
+					jiraURL
 				FROM Project
 				WHERE projectCode = $1 AND username = $2;`, projectCode, username).
 		Scan(&projectName, &totalBudget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectID, &jiraURL)

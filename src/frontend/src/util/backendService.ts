@@ -26,5 +26,5 @@ export async function fetchFromBackend(request: Request, endpoint: string, data?
         console.error('Error:', response.statusText);
     }
 
-    return Promise.reject("The request to the backend failed to resolve.");
+    return Promise.reject("The request to the backend failed to resolve. Endpoint "+endpoint);
 }
