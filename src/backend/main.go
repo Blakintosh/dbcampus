@@ -12,12 +12,14 @@ import (
 )
 
 func main() {
-	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
+	logFile, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer logFile.Close()
 	log.SetOutput(logFile)
+
+	log.Println("Server started")
 
 	db, err := connector.ConnectDB()
 	if err != nil {

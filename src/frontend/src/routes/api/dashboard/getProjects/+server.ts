@@ -10,5 +10,5 @@ export const POST = (async ({ request }) => {
         throw error(401, "Your session has expired. Please sign in again.");
     }
 
-	return new Response(null, await response.json());
+	return new Response(response.body);
 }) satisfies RequestHandler;

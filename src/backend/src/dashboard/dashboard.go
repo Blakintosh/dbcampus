@@ -193,7 +193,8 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	var projectCodes []string
 	var projectNames []string
-	var projects []DashboardData
+	var projects []DashboardData = []DashboardData{}
+	var projectList DashboardDataList
 	var username string
 
 	// Connect to the database
@@ -242,6 +243,8 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer rows.Close()
 
+	// Scan the project codes and names
+	log.Println("rows.next: ", rows.Next())
 	for rows.Next() {
 		var projectCode string
 		var projectName string
@@ -263,17 +266,19 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		log.Println("Project code: ", projectCodes[i])
 		log.Println("Project name: ", projectNames[i])
 	}
+	projectList.DashboardData = projects
 
 	// Return the data to the frontend as a JSON
 	res.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(res).Encode(projects)
+
+	err = json.NewEncoder(res).Encode(projectList)
 	if err != nil {
 		log.Println("Error encoding project data: ", err)
 		http.Error(res, "Error encoding project data to json", http.StatusInternalServerError)
 	}
 	log.Println("Successfully sent project data to frontend. " + strconv.Itoa(len(projects)) + " projects found.")
 	// print json to console
-	b, err := json.Marshal(projects)
+	b, err := json.Marshal(projectList)
 	if err != nil {
 		log.Println("Error encoding project data: ", err)
 		http.Error(res, "Error encoding project data", http.StatusInternalServerError)
