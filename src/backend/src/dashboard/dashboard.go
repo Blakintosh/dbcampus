@@ -254,6 +254,8 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 func CreateProject(res http.ResponseWriter, req *http.Request) {
 	// Receive the data from the frontend using json
 	var project ProjectData
+	var username string
+
 	// Access the request body
 	reqBody, err := ioutil.ReadAll(req.Body)
 	fmt.Println("reqBody register: ", string(reqBody))
@@ -275,8 +277,24 @@ func CreateProject(res http.ResponseWriter, req *http.Request) {
 	}
 	defer connector.CloseDB(db)
 
+	// Get the username from the session
+	session, err := auth.Store.Get(req, "session")
+
+	if err != nil || session.Values["authenticated"] == nil {
+		log.Println("Unable to get session: ", err)
+		http.Error(res, "Unable to get session", http.StatusInternalServerError)
+	}
+
+	sessionID := session.Values["sessionId"].(string)
+	log.Println("Session ID: ", sessionID)
+
+	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&username)
+	if err != nil {
+		log.Println("Error checking session: ", err)
+	}
+
 	// Put the project data in the database
-	_, err = db.Exec(`INSERT INTO "Project" ("projectCode", "username", "projectName", "budget", "monthlyExpenses", "customSpendings", "deadline", "teamMeanExperience", "weeklyTeamMeetings", "clientMeetingsPerMonth","jiraProjectCode", "jiraURL") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, project.ProjectCode, project.ProjectName, project.Budget, project.MonthlyExpenses, project.CustomSpendings, project.Deadline, project.TeamMeanExperience, project.WeeklyTeamMeetings, project.ClientMeetingsPerMonth, project.JiraProjectID, project.JiraURL)
+	_, err = db.Exec(`INSERT INTO project (projectCode, username, projectName, budget, monthlyExpenses, customSpendings, deadline, teamMeanExperience, weeklyTeamMeetings, clientMeetingsPerMonth,jiraProjectCode, jiraURL) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, project.ProjectCode, username, project.ProjectName, project.Budget, project.MonthlyExpenses, project.CustomSpendings, project.Deadline, project.TeamMeanExperience, project.WeeklyTeamMeetings, project.ClientMeetingsPerMonth, project.JiraProjectID, project.JiraURL)
 	if err != nil {
 		log.Println("Error inserting project data: ", err)
 		http.Error(res, "Error inserting project data", http.StatusInternalServerError)
