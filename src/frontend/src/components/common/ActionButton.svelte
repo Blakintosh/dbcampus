@@ -4,19 +4,23 @@
 
 	export let type: string = 'primary';
 	export let label: string = 'New';
+    export let additionalClasses: string = '';
 
 	export let loading: boolean = true;
+    export let disabled: boolean = false;
 
 	const dispatch = createEventDispatcher();
 	const handleClick = () => {
-		dispatch('click');
+        if(!disabled) {
+		    dispatch('click');
+        }
 	};
 </script>
 
 <ButtonRoot
 	{type}
-	buttonClass="duration-75 rounded-md text-sm md:text-md font-medium py-1.5 text-slate-100 shadow-md flex items-center gap-2 justify-center {loading ? "opacity-80 cursor-wait" : ""}"
-	disabled={loading}
+	buttonClass="duration-75 rounded-md text-sm md:text-md font-medium py-1.5 text-slate-100 shadow-md flex items-center gap-2 justify-center {additionalClasses} {loading ? "opacity-80 cursor-wait" : ""} {disabled ? "cursor-not-allowed" : ""}"
+	disabled={loading || disabled}
 	on:click={handleClick}
 >
 	{#if loading}

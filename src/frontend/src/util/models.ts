@@ -27,23 +27,23 @@ export type SurveySummary = {
 export type SoftwareSurveys = {
 	client?: SurveySummary,
 	team?: SurveySummary,
-	health: HealthSummary
+	health: HealthInformation
 }
 
 /**
  * Health summary tile sub-model of a SoftwareProject.
  */
-export type HealthSummary = {
-    status: RagClassification,
+export type HealthInformation = {
 	message: string,
-    issues: number
+    suggestions: Array<string>,
+    percentageHealth: number
 }
 
 export type ProjectBudget = {
 	budget: number,
 	spend: number,
 	spendOverTime: Array<number>,
-	health: HealthSummary
+	health: HealthInformation
 }
 
 /**
@@ -52,7 +52,7 @@ export type ProjectBudget = {
 export type SoftwareProject = {
 	id: number,
     name: string
-    health: HealthSummary,
+    health: HealthInformation,
     surveys: SoftwareSurveys,
 	budget: ProjectBudget
 };
@@ -90,8 +90,27 @@ export type IssueSurveyRequest = {
     questions: Array<IssueSurveyQuestion>
 }
 
+export type SurveyQuestionType = "scale";
+
 export type IssueSurveyQuestion = {
     title: string,
-    type: string,
+    type: SurveyQuestionType,
     questionID: string
+}
+
+export type CreateProjectData = {
+    projectCode: string,
+    projectName: string,
+    budget: number,
+    monthlyExpenses: number,
+    customSpendings: number,
+    deadline: Date,
+    managerExperience: number,
+    teamMeanExperience: number,
+    weeklyTeamMeetings: number,
+    clientMeetingsPerMonth: number,
+    jiraProjectId: string,
+    jiraEmail: string,
+    jiraApiToken: string,
+    jiraURL: string
 }

@@ -87,9 +87,9 @@ const projects: Array<SoftwareProject> = [
 		id: 2,
 		name: "Foo",
 		health: {
-			status: "warning",
 			message: "Placeholder",
-			issues: 2
+            suggestions: [],
+            percentageHealth: 0.512
 		},
 		surveys: {
 			client: {
@@ -150,9 +150,9 @@ const projects: Array<SoftwareProject> = [
 				suggestions: []
 			},
 			health: {
-				status: "danger",
 				message: "Responses with critically low satisfaction are present in the client survey.",
-				issues: 4
+				suggestions: [],
+                percentageHealth: 0.3
 			}
 		},
 		budget: {
@@ -162,9 +162,9 @@ const projects: Array<SoftwareProject> = [
 				0, 1058, 5056, 12120, 14150, 15650, 18650
 			],
 			health: {
-				status: "normal",
 				message: "Project is trending for completion under budget.",
-				issues: 0
+				suggestions: [],
+                percentageHealth: 1
 			}
 		}
 	}

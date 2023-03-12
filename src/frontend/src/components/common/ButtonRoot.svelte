@@ -16,8 +16,8 @@
 				hoverColour = "hover:bg-slate-600";
 				break;
 			case "secondary":
-				typeColour = "bg-slate-600";
-				hoverColour = "hover:bg-slate-700";
+				typeColour = "bg-slate-400";
+				hoverColour = "hover:bg-slate-500";
 				break;
 			case "danger":
 				typeColour = "bg-red-500";
