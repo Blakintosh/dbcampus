@@ -36,6 +36,7 @@ func main() {
 
 	router.HandleFunc("/register", auth.SignupPage)
 	router.HandleFunc("/login", auth.LoginPage)
+	router.HandleFunc("/dashboard/project", dash.ProjectPage)
 	router.HandleFunc("/dashboard", dash.DashboardPage)
 	router.HandleFunc("/newProject", dash.CreateProject)
 	http.ListenAndServe(":8081", router)
