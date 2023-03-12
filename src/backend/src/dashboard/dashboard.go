@@ -217,7 +217,7 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	log.Println("Session ID: ", sessionID)
 
 	// Get the username from the session
-	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&username)
+	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE sessionid=$1`, sessionID).Scan(&username)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 		http.Error(res, "Error getting username", http.StatusInternalServerError)
@@ -329,7 +329,7 @@ func CreateProject(res http.ResponseWriter, req *http.Request) {
 	sessionID := session.Values["sessionId"].(string)
 	log.Println("Session ID: ", sessionID)
 
-	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&username)
+	err = db.QueryRow(`SELECT "username" FROM "TeamManager" WHERE sessionID=$1`, sessionID).Scan(&username)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 	}
