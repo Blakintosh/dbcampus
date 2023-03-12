@@ -70,7 +70,11 @@
 			goto(`/dashboard/${$newProjectData.projectCode}`);
 		} else {
             alert("Error sob emoji");
+
+            const data = await response.json();
+            alert(data.message);
             creatingProject = false;
+            stage = 4;
             // sob emoji here :( 
         }
     }

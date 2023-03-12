@@ -3,6 +3,7 @@
     import AuthenticationView from "../../../components/auth/AuthenticationView.svelte";
 	import TextField from "../../../components/auth/TextField.svelte";
 	import PasswordField from "../../../components/auth/PasswordField.svelte";
+	import { goto } from "$app/navigation";
 
 	let username: string = "";
 	let password: string = "";
@@ -58,11 +59,11 @@
 			}),
 		});
 
-		const data = await response.json();
-		if (data.status === 200) {
-			alert(`${JSON.stringify(data)}`);
-		}
 		authenticating = false;
+
+        if(response.status === 200) {
+            goto("/auth/login");
+        }
 	};
 </script>
 
