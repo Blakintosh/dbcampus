@@ -6,6 +6,8 @@
 	import ManageProjectModal from "../../../components/dashboard/project/manage/ManageProjectModal.svelte";
 
 	export let data: LayoutData;
+
+    console.log("test" + data.availableProjects);
 </script>
 
 <svelte:head>

@@ -223,13 +223,10 @@ export const load = (async (event) => {
         throw redirect(301, "/dashboard/new");
     }
 
-    console.log(availableProjects);
-    
-
     return {
 		// Selected project
 		project: await getProject(event.params.slug),
 		// All available projects
-		availableProjects: availableProjects.projects
+		availableProjects: availableProjects.data
 	};
 });

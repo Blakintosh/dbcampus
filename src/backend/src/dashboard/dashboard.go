@@ -266,6 +266,11 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		log.Println("Project code: ", projectCodes[i])
 		log.Println("Project name: ", projectNames[i])
 	}
+
+	projects = append(projects, DashboardData{
+		ProjectCode: "foo",
+		ProjectName: "bar",
+	})
 	projectList.DashboardData = projects
 
 	// Return the data to the frontend as a JSON
