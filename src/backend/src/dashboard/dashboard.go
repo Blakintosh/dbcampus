@@ -29,6 +29,10 @@ type DashboardData struct {
 	ProjectName string `json:"name"`
 }
 
+type DashboardDataList struct {
+	DashboardData []DashboardData `json:"data"`
+}
+
 // Project data
 type ProjectData struct {
 	ProjectCode            string    `json:"projectCode"`
@@ -189,7 +193,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	var projectCodes []string
 	var projectNames []string
-	var projects []ProjectData
+	var projects []DashboardData
 	var username string
 
 	// Connect to the database
@@ -252,7 +256,7 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 
 	// for each project code and name, add it to the struct
 	for i := 0; i < len(projectCodes); i++ {
-		projects = append(projects, ProjectData{
+		projects = append(projects, DashboardData{
 			ProjectCode: projectCodes[i],
 			ProjectName: projectNames[i],
 		})
@@ -268,6 +272,13 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Error encoding project data to json", http.StatusInternalServerError)
 	}
 	log.Println("Successfully sent project data to frontend. " + strconv.Itoa(len(projects)) + " projects found.")
+	// print json to console
+	b, err := json.Marshal(projects)
+	if err != nil {
+		log.Println("Error encoding project data: ", err)
+		http.Error(res, "Error encoding project data", http.StatusInternalServerError)
+	}
+	log.Println(string(b))
 	res.WriteHeader(http.StatusOK)
 }
 
