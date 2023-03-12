@@ -1,5 +1,6 @@
 import type { SoftwareProject } from "../../../util/models";
 import { error, redirect } from "@sveltejs/kit";
+import { goto } from "$app/navigation";
 
 // Placeholder
 const projects: Array<SoftwareProject> = [
@@ -179,29 +180,54 @@ const getProject = (async (id: number) => {
 	throw error(404, "Project not found");
 });
 
-const getAvailableProjects = (async () => {
-	const result = [];
-	for(const project of projects) {
-		result.push({
-			id: project.id,
-			name: project.name
-		});
-	}
+const getAvailableProjects = (async (event) => {
+	const response = await event.fetch("/api/dashboard/getProjects", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
 
-	return result;
+    const projectsAvailable = await response.json();
+
+    if(projectsAvailable.length === 0) {
+        goto("/dashboard/new");
+    }
+
+	return await projectsAvailable;
 });
 
 // @ts-expect-error - Params any-type
-export const load = (async ({ params }) => {
+export const load = (async (event) => {
 	/* 
 		BE connection: Fetch the project with the given slug from the database,
 		return it if the user owns it and it exists, otherwise void the request.
 	*/
 
+    const availableProjectsResponse = await event.fetch("/api/dashboard/getProjects", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if(availableProjectsResponse.status === 500) {
+        throw redirect(301, "/auth/login");
+    }
+
+    const availableProjects = await availableProjectsResponse.json();
+
+    if(!availableProjects || availableProjects.length === 0) {
+        throw redirect(301, "/dashboard/new");
+    }
+
+    console.log(availableProjects);
+    
+
     return {
 		// Selected project
-		project: await getProject(params.slug),
+		project: await getProject(event.params.slug),
 		// All available projects
-		availableProjects: await getAvailableProjects()
+		availableProjects: await availableProjects
 	};
 });
