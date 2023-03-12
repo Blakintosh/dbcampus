@@ -204,6 +204,24 @@ export const load = (async (event) => {
 		return it if the user owns it and it exists, otherwise void the request.
 	*/
 
+    const currentProject = await event.fetch("/api/dashboard/getProject", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "projectCode": event.params.slug
+        })
+    });
+
+    if(currentProject.status === 404) {
+        throw redirect(301, "/dashboard");
+    } else if(currentProject.status === 401) {
+        throw redirect(301, "/auth/login");
+    } else if(currentProject.status === 500) {
+        throw error(500, "Unable to contact the backend. Please try again later.");
+    }
+
     const availableProjectsResponse = await event.fetch("/api/dashboard/getProjects", {
         method: "POST",
         headers: {

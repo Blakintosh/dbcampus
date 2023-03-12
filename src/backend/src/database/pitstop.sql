@@ -1,49 +1,49 @@
-DROP TABLE IF EXISTS TeamManager CASCADE;
-CREATE TABLE TeamManager(
-    teamManagerID SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(120) NOT NULL,
-    sessionID VARCHAR(120),
-    jiraEmail VARCHAR(120),
-    jiraApiToken VARCHAR(120),
-    managerExperience DECIMAL(5,3)
+DROP TABLE IF EXISTS "TeamManager" CASCADE;
+CREATE TABLE "TeamManager"(
+    "teamManagerID" SERIAL PRIMARY KEY,
+    "username" VARCHAR(50) UNIQUE NOT NULL,
+    "password" VARCHAR(120) NOT NULL,
+    "sessionID" VARCHAR(120),
+    "jiraEmail" VARCHAR(120),
+    "jiraApiToken" VARCHAR(120),
+    "managerExperience" DECIMAL(5,3)
 );
 
-DROP TABLE IF EXISTS Project CASCADE;
-CREATE TABLE Project(
-    projectCode VARCHAR(3) NOT NULL,
-    username VARCHAR(50) NOT NULL REFERENCES TeamManager(username),
-    projectName VARCHAR(120),
-    projSuccess DECIMAL(3,2),
-    budget DECIMAL(17,2),
-    monthlyExpenses DECIMAL(17,2),
-    customSpendings DECIMAL(17,2),
-    deadline TIMESTAMP,
-    teamMeanExperience DECIMAL(5,3),
-    weeklyTeamMeetings DECIMAL(5,3),
-    clientMeetingsPerMonth DECIMAL(5,3),
-    jiraProjectCode VARCHAR(120),
-    jiraURL VARCHAR(120),
-    PRIMARY KEY (projectCode, username)
+DROP TABLE IF EXISTS "Project" CASCADE;
+CREATE TABLE "Project"(
+    "projectCode" VARCHAR(3) NOT NULL,
+    "username" VARCHAR(50) NOT NULL REFERENCES "TeamManager"("username"),
+    "projectName" VARCHAR(120),
+    "projSuccess" DECIMAL(3,2),
+    "budget" DECIMAL(17,2),
+    "monthlyExpenses" DECIMAL(17,2),
+    "customSpendings" DECIMAL(17,2),
+    "deadline" TIMESTAMP,
+    "teamMeanExperience" DECIMAL(5,3),
+    "weeklyTeamMeetings" DECIMAL(5,3),
+    "clientMeetingsPerMonth" DECIMAL(5,3),
+    "jiraProjectCode" VARCHAR(120),
+    "jiraURL" VARCHAR(120),
+    PRIMARY KEY ("projectCode", "username")
 );
 
-DROP TABLE IF EXISTS TeamSurveys CASCADE;
-CREATE TABLE TeamSurveys(
-    teamMetricsID SERIAL PRIMARY KEY,
-    projectCode VARCHAR(50) UNIQUE NOT NULL REFERENCES Project(projectCode),
-    surveyLink VARCHAR(120),
-    formID VARCHAR(50) UNIQUE NOT NULL,
-    supportFromTopManagement DECIMAL(3,2),
-    testingQuality DECIMAL(3,2),
-    documentationQuality DECIMAL(3,2),
-    clarityOfRequirements DECIMAL(3,2),
-    taskTooMuch DECIMAL(3,2),
-    teamSatisfaction DECIMAL(3,2)
+DROP TABLE IF EXISTS "TeamSurveys" CASCADE;
+CREATE TABLE "TeamSurveys"(
+    "teamMetricsID" SERIAL PRIMARY KEY,
+    "projectCode" VARCHAR(50) UNIQUE NOT NULL REFERENCES "Project"("projectCode"),
+    "surveyLink" VARCHAR(120),
+    "formID" VARCHAR(50) UNIQUE NOT NULL,
+    "supportFromTopManagement" DECIMAL(3,2),
+    "testingQuality" DECIMAL(3,2),
+    "documentationQuality" DECIMAL(3,2),
+    "clarityOfRequirements" DECIMAL(3,2),
+    "taskTooMuch" DECIMAL(3,2),
+    "teamSatisfaction" DECIMAL(3,2)
 );
 
-DROP TABLE IF EXISTS Client CASCADE;
-CREATE TABLE Client(
-    clientID SERIAL PRIMARY KEY
+DROP TABLE IF EXISTS "Client" CASCADE;
+CREATE TABLE "Client"(
+    "clientID" SERIAL PRIMARY KEY
 );
 
 -- DROP TABLE IF EXISTS ClientSurveys CASCADE;
