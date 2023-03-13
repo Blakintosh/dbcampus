@@ -18,7 +18,7 @@
         });
 
         if(availableProjectsResponse.status === 401) {
-            goto(301, "/auth/login");
+            goto("/auth/login");
         } else if(availableProjectsResponse.status === 500) {
             throw error(500, "Unable to contact the backend. Please try again later.");
         }
