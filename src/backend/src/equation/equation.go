@@ -112,14 +112,105 @@ func GetPercentage(username string, projectCode string) (float64, error) {
 	var customSpendings float64
 
 	// Get the data from the database
-	err = db.QueryRow(`SELECT managerExperience, jiraEmail, jiraApiToken FROM TeamManager WHERE username=$1`, username).
-		Scan(&ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
+	err = db.QueryRow(`SELECT managerExperience FROM TeamManager WHERE username=$1`, username).
+		Scan(&ManagerWeights[0].Weight)
+	if err != nil {
+		log.Println("error getting manager experience: ", err)
+	}
+	err = db.QueryRow(`SELECT jiraEmail FROM TeamManager WHERE username=$1`, username).
+		Scan(&jiraEmail)
+	if err != nil {
+		log.Println("error getting jira email: ", err)
+	}
 
-	err = db.QueryRow(`SELECT budget, deadline, monthlyExpenses, jiraURL, teamMeanExperience, customSpendings, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1`, projectCode).
-		Scan(&ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, &ManagerWeights[2].Weight, &customSpendings, &ManagerWeights[1].Weight, &ManagerWeights[3].Weight)
+	err = db.QueryRow(`SELECT jiraApiToken FROM TeamManager WHERE username=$1`, username).
+		Scan(&jiraToken)
+	if err != nil {
+		log.Println("error getting jira token: ", err)
+	}
 
-	err = db.QueryRow(`SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1`, projectCode).
-		Scan(&SurveyWeights[0].Weight, &SurveyWeights[1].Weight, &SurveyWeights[2].Weight, &SurveyWeights[3].Weight, &SurveyWeights[4].Weight, &SurveyWeights[5].Weight)
+	err = db.QueryRow(`SELECT budget FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[4].Weight)
+	if err != nil {
+		log.Println("error getting budget: ", err)
+	}
+
+	err = db.QueryRow(`SELECT deadline FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&deadline)
+	if err != nil {
+		log.Println("error getting deadline: ", err)
+	}
+
+	err = db.QueryRow(`SELECT monthlyExpenses FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&monthlyExpenses)
+	if err != nil {
+		log.Println("error getting monthly expenses: ", err)
+	}
+
+	err = db.QueryRow(`SELECT jiraURL FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&jiraUrl)
+	if err != nil {
+		log.Println("error getting jira url: ", err)
+	}
+
+	err = db.QueryRow(`SELECT teamMeanExperience FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[2].Weight)
+	if err != nil {
+		log.Println("error getting team mean experience: ", err)
+	}
+
+	err = db.QueryRow(`SELECT customSpendings FROM project WHERE projectCode=$1 AND username =$2`, projectCode, username).
+		Scan(&customSpendings)
+	if err != nil {
+		log.Println("error getting custom spendings: ", err)
+	}
+
+	err = db.QueryRow(`SELECT weeklyTeamMeetings FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[1].Weight)
+	if err != nil {
+		log.Println("error getting weekly team meetings: ", err)
+	}
+
+	err = db.QueryRow(`SELECT clientMeetingsPerMonth FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[3].Weight)
+	if err != nil {
+		log.Println("error getting client meetings per month: ", err)
+	}
+
+	err = db.QueryRow(`SELECT supportFromTopManagement FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[0].Weight)
+	if err != nil {
+		log.Println("error getting support from top management: ", err)
+	}
+
+	err = db.QueryRow(`SELECT testingQuality FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[1].Weight)
+	if err != nil {
+		log.Println("error getting testing quality: ", err)
+	}
+
+	err = db.QueryRow(`SELECT documentationQuality FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[2].Weight)
+	if err != nil {
+		log.Println("error getting documentation quality: ", err)
+	}
+
+	err = db.QueryRow(`SELECT clarityOfRequirements FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[3].Weight)
+	if err != nil {
+		log.Println("error getting clarity of requirements: ", err)
+	}
+	err = db.QueryRow(`SELECT taskTooMuch FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[4].Weight)
+	if err != nil {
+		log.Println("error getting task too much: ", err)
+	}
+
+	err = db.QueryRow(`SELECT teamSatisfaction FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[5].Weight)
+	if err != nil {
+		log.Println("error getting team satisfaction: ", err)
+	}
 
 	// Change budget weight and overdue tasks weight depending on the data
 	if ManagerWeights[4].Weight != 0 {
@@ -156,22 +247,107 @@ func GetSuggestions(username string, projectCode string) ([]string, error) {
 	var customSpendings float64
 
 	// Get the data from the database
-	err = db.QueryRow(`SELECT managerExperience, jiraEmail, jiraApiToken FROM TeamManager WHERE username=$1`, username).
-		Scan(&ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
+	err = db.QueryRow(`SELECT managerExperience FROM TeamManager WHERE username=$1`, username).
+		Scan(&ManagerWeights[0].Weight)
 	if err != nil {
-		log.Println(err)
+		log.Println("error getting manager experience: ", err)
 	}
 
-	err = db.QueryRow(`SELECT budget, deadline, monthlyExpenses, jiraURL, teamMeanExperience, customSpendings, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1`, projectCode).
-		Scan(&ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, &ManagerWeights[2].Weight, &customSpendings, &ManagerWeights[1].Weight, &ManagerWeights[3].Weight)
+	err = db.QueryRow(`SELECT jiraEmail FROM TeamManager WHERE username=$1`, username).
+		Scan(&jiraEmail)
 	if err != nil {
-		log.Println(err)
+		log.Println("error getting jira email: ", err)
 	}
-	err = db.QueryRow(`SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1`, projectCode).
-		Scan(&SurveyWeights[0].Weight, &SurveyWeights[1].Weight, &SurveyWeights[2].Weight, &SurveyWeights[3].Weight, &SurveyWeights[4].Weight, &SurveyWeights[5].Weight)
+
+	err = db.QueryRow(`SELECT jiraApiToken FROM TeamManager WHERE username=$1`, username).
+		Scan(&jiraToken)
 	if err != nil {
-		log.Println(err)
+		log.Println("error getting jira token: ", err)
 	}
+
+	err = db.QueryRow(`SELECT budget FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[4].Weight)
+	if err != nil {
+		log.Println("error getting budget: ", err)
+	}
+
+	err = db.QueryRow(`SELECT deadline FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&deadline)
+	if err != nil {
+		log.Println("error getting deadline: ", err)
+	}
+
+	err = db.QueryRow(`SELECT monthlyExpenses FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&monthlyExpenses)
+	if err != nil {
+		log.Println("error getting monthly expenses: ", err)
+	}
+
+	err = db.QueryRow(`SELECT jiraURL FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&jiraUrl)
+	if err != nil {
+		log.Println("error getting jira url: ", err)
+	}
+
+	err = db.QueryRow(`SELECT teamMeanExperience FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[2].Weight)
+	if err != nil {
+		log.Println("error getting team mean experience: ", err)
+	}
+
+	err = db.QueryRow(`SELECT customSpendings FROM project WHERE projectCode=$1 AND username =$2`, projectCode, username).
+		Scan(&customSpendings)
+	if err != nil {
+		log.Println("error getting custom spendings: ", err)
+	}
+
+	err = db.QueryRow(`SELECT weeklyTeamMeetings FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[1].Weight)
+	if err != nil {
+		log.Println("error getting weekly team meetings: ", err)
+	}
+
+	err = db.QueryRow(`SELECT clientMeetingsPerMonth FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&ManagerWeights[3].Weight)
+	if err != nil {
+		log.Println("error getting client meetings per month: ", err)
+	}
+
+	err = db.QueryRow(`SELECT supportFromTopManagement FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[0].Weight)
+	if err != nil {
+		log.Println("error getting support from top management: ", err)
+	}
+
+	err = db.QueryRow(`SELECT testingQuality FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[1].Weight)
+	if err != nil {
+		log.Println("error getting testing quality: ", err)
+	}
+
+	err = db.QueryRow(`SELECT documentationQuality FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[2].Weight)
+	if err != nil {
+		log.Println("error getting documentation quality: ", err)
+	}
+
+	err = db.QueryRow(`SELECT clarityOfRequirements FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[3].Weight)
+	if err != nil {
+		log.Println("error getting clarity of requirements: ", err)
+	}
+	err = db.QueryRow(`SELECT taskTooMuch FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[4].Weight)
+	if err != nil {
+		log.Println("error getting task too much: ", err)
+	}
+
+	err = db.QueryRow(`SELECT teamSatisfaction FROM survey WHERE projectCode=$1 AND username=$2`, projectCode, username).
+		Scan(&SurveyWeights[5].Weight)
+	if err != nil {
+		log.Println("error getting team satisfaction: ", err)
+	}
+
 	// Change budget weight and overdue tasks weight depending on the data
 	if ManagerWeights[4].Weight != 0 {
 		ManagerWeights[4].Weight = 1
