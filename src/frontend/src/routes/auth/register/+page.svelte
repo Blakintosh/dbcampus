@@ -7,6 +7,7 @@
 
 	let username: string = "";
 	let password: string = "";
+    let managerExperience: string = "";
     let confirmPassword: string = "";
 
 	let usernameIsError = false;
@@ -56,6 +57,7 @@
 			body: JSON.stringify({
 				username: username,
 				password: password,
+                managerExperience: Number(managerExperience)
 			}),
 		});
 
@@ -78,6 +80,7 @@
     </span>
     <span slot="body" class="w-full">
         <TextField label="Username" name="username" bind:value={username} isError={usernameIsError} errorMessage={usernameErrorMessage} />
+        <TextField label="How much experience do you have?" name="experience" bind:value={managerExperience} />
         <PasswordField label="Password" name="password" bind:value={password} isError={passwordIsError} errorMessage={passwordErrorMessage} />
         <PasswordField label="Confirm Password" name="confirmPassword" bind:value={confirmPassword} isError={confirmPasswordIsError} errorMessage={confirmPasswordErrorMessage} />
         

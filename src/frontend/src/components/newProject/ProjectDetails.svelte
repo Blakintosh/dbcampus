@@ -56,3 +56,18 @@
 <FormField label="When is the project set to be finished?" isFor="finishDate" required error={deadlineError}>
 	<input type="date" name="finishDate" class="w-full border {deadlineError ? "border-red-400 bg-red-100/80" : "border-slate-300"} rounded-lg p-2 mt-2" bind:value={deadlineDate}/>
 </FormField>
+
+<h1 class="text-xl mt-4">Additional Details</h1>
+
+<FormField label="How often does your team meet per week?" isFor="weeklyTeamMeetings" error={""}>
+	<input type="number" name="weeklyTeamMeetings" placeholder="Meetings per Week" min="0" class="w-full border {"" ? "border-red-400 bg-red-100/80" : "border-slate-300"} rounded-lg p-2 mt-2" bind:value={$newProjectData.weeklyTeamMeetings}/>
+</FormField>
+
+<FormField label="How often do you meet with your client every month?" isFor="clientMeetingsPerMonth" error={""}>
+	<input type="number" name="clientMeetingsPerMonth" placeholder="Meetings per Month" min="0" class="w-full border {"" ? "border-red-400 bg-red-100/80" : "border-slate-300"} rounded-lg p-2 mt-2" bind:value={$newProjectData.clientMeetingsPerMonth}/>
+</FormField>
+
+
+<FormField label="What is your team's mean experience in years?" isFor="teamMeanExperience" error={""}>
+	<input type="number" name="teamMeanExperience" placeholder="Mean Experience" min="0" class="w-full border {"" ? "border-red-400 bg-red-100/80" : "border-slate-300"} rounded-lg p-2 mt-2" bind:value={$newProjectData.teamMeanExperience}/>
+</FormField>
