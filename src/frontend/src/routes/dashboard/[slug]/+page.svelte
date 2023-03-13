@@ -62,7 +62,7 @@
                     <div class="{healthColourClass} w-full h-1 my-2 rounded-sm"></div>
                     <h3 class="font-medium text-md xl:text-lg">{healthHeading}</h3>
                 </div>
-                <p class="text-xs xl:text-md">{project.health.message}</p>
+                <p class="text-xs xl:text-md"></p>
             </div>
         </div>
     </Tile>
