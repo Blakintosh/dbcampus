@@ -130,7 +130,7 @@ func GetPercentage(username string, projectCode string) (float64, error) {
 	}
 
 	err = db.QueryRow(`SELECT budget FROM project WHERE projectCode=$1 AND username=$2`, projectCode, username).
-		Scan(&ManagerWeights[4].Weight)
+		Scan(&budget)
 	if err != nil {
 		log.Println("error getting budget: ", err)
 	}
