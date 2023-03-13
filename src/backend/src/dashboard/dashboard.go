@@ -33,8 +33,8 @@ type DashboardDataList struct {
 	DashboardData []DashboardData `json:"data"`
 }
 
-type tmp struct {
-	ProjectCode string `json:"projectCode"`
+type ProjectCode struct {
+	Code string `json:"projectCode"`
 }
 
 // Project data
@@ -73,7 +73,6 @@ type SurveySummary struct {
 
 // HealthInformation is a sub-model of a SoftwareProject.
 type HealthInformation struct {
-	Message          string   `json:"message"`
 	Suggestions      []string `json:"suggestions"`
 	PercentageHealth float64  `json:"percentageHealth"`
 }
@@ -117,8 +116,6 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	var teamMeanExperience float64
 	var weeklyTeamMeetings float64
 	var clientMeetingsPerMonth float64
-	var jiraProjectCode string
-	var jiraURL string
 
 	// Get the username from the session cookie
 	session, err := auth.Store.Get(req, "session")
@@ -138,15 +135,15 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	// Get the username from the session cookie
 	username = session.Values["username"].(string)
 
-	var tempCode tmp
+	var codeGetter ProjectCode
 	// Read the project code from the request json
-	err = json.NewDecoder(req.Body).Decode(&tempCode)
+	err = json.NewDecoder(req.Body).Decode(&codeGetter)
 	if err != nil {
 		log.Println("Error reading project code: ", err)
 		http.Error(res, "Error reading project code", http.StatusInternalServerError)
 		return
 	}
-	projectCode = tempCode.ProjectCode
+	projectCode = codeGetter.Code
 
 	db, err := connector.ConnectDB()
 	if err != nil {
@@ -198,21 +195,21 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 					deadline,
 					teamMeanExperience,
 					weeklyTeamMeetings,
-					clientMeetingsPerMonth,
-					jiraProjectCode,
-					jiraURL
+					clientMeetingsPerMonth
 				FROM Project
 				WHERE projectCode = $1 AND username = $2;`, projectCode, username).
-		Scan(&projectName, &budget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectCode, &jiraURL)
+		Scan(&projectName, &budget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth)
 	if err != nil {
 		log.Println("Error getting project data: ", err)
+		log.Println("Project code: ", projectCode)
+		log.Println("Username: ", username)
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
 		return
 	}
 
 	// combine
 
-	currentSpend := budget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
+	currentSpend := (((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings
 
 	// Put all the data we have about the project in a struct
 	project := ProjectData{
@@ -227,45 +224,47 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		TeamMeanExperience:     teamMeanExperience,
 		WeeklyTeamMeetings:     weeklyTeamMeetings,
 		ClientMeetingsPerMonth: clientMeetingsPerMonth,
-		JiraProjectID:          jiraProjectCode,
-		JiraURL:                jiraURL,
 	}
 
 	log.Println("Project data: ", project)
+
+	// Get the project data from the database
+	suggestions, err := equation.GetSuggestions(projectCode, username)
+	if err != nil {
+		log.Println("Error getting project suggestions: ", err)
+		http.Error(res, "Error getting project data", http.StatusInternalServerError)
+	}
 
 	softwareProject := SoftwareProject{
 		Code: projectCode,
 		Name: projectName,
 		Health: HealthInformation{
-			Message:          "",
-			Suggestions:      []string{},
-			PercentageHealth: 0,
+			Suggestions:      suggestions,
+			PercentageHealth: float64(projectSuccess),
 		},
 		Surveys: SoftwareSurveys{
 			Client: &SurveySummary{
 				Date:        time.Now(),
 				Factors:     []SurveyFactor{},
-				Suggestions: []string{},
+				Suggestions: suggestions,
 			},
 			Team: &SurveySummary{
 				Date:        time.Now(),
 				Factors:     []SurveyFactor{},
-				Suggestions: []string{},
+				Suggestions: suggestions,
 			},
 			Health: HealthInformation{
-				Message:          "",
-				Suggestions:      []string{},
-				PercentageHealth: 0,
+				Suggestions:      suggestions,
+				PercentageHealth: float64(projectSuccess),
 			},
 		},
 		Budget: ProjectBudget{
 			Budget:        budget,
-			Spend:         0,
-			SpendOverTime: []float64{},
+			Spend:         currentSpend,
+			SpendOverTime: []float64{}, // what is this supposed to be?
 			Health: HealthInformation{
-				Message:          "",
-				Suggestions:      []string{},
-				PercentageHealth: 0,
+				Suggestions:      suggestions,
+				PercentageHealth: float64(projectSuccess),
 			},
 		},
 	}

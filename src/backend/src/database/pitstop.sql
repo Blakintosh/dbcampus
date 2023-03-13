@@ -46,6 +46,13 @@ CREATE TABLE Client(
     clientID SERIAL PRIMARY KEY
 );
 
+-- Insert dummy team manager data
+INSERT INTO TeamManager (username, password, managerExperience) VALUES ('admin', '$2a$10$dW7ufHTFVBJdTh5LAqmmJ.PyLVOG6CvqUkawV/keN.PxtrgcMuRGq', 5.0);
+
+-- Insert dummy project data
+INSERT INTO Project (projectCode, username, projectName, budget, monthlyExpenses, customSpendings, deadline, teamMeanExperience, weeklyTeamMeetings, clientMeetingsPerMonth) VALUES ('ABC', 'admin', 'Project ABC', 1000000.00, 1000.00, 10000.00, '2023-12-31 23:59:59', 5.0, 1.0, 1.0);
+
+
 -- DROP TABLE IF EXISTS ClientSurveys CASCADE;
 -- CREATE TABLE ClientSurveys(
 --     clientMetricsID SERIAL PRIMARY KEY,

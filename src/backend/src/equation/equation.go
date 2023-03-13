@@ -3,7 +3,9 @@ package equation
 import (
 	"connector"
 	"jira"
+	"log"
 	"math"
+	"sort"
 	"time"
 )
 
@@ -40,7 +42,7 @@ var SurveyWeights = []Equation{
 func GetMaxPossibleWeightForInput(e []Equation) float64 {
 	var total float64
 	for _, eq := range e {
-		if eq.Weight != 0 {
+		if eq.Weight > 0 {
 			total += eq.MaxWeight
 		}
 	}
@@ -135,79 +137,69 @@ func GetPercentage(username string, projectCode string) (float64, error) {
 	return totalScore, nil
 }
 
-// Gets the best suggestion for the project by going through the data provided and finding what is weighing the project down the most and give its suggestion back
-func GetSuggestion() (string, error) {
+// Gets the top 4 suggestions for the project by going through the data provided and finding what is weighing the project down the most and give its suggestion back
+func GetSuggestions(username string, projectCode string) ([]string, error) {
 	db, err := connector.ConnectDB()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer connector.CloseDB(db)
-
-	// Cookie data
-	var username string
-	var projectCode string
 
 	// Manager data not in ManagerWeights
 	var jiraEmail string
 	var jiraToken string
 
 	// Project data not in ManagerWeights
-	// var budget float64
 	var deadline time.Time
 	var monthlyExpenses float64
 	var jiraUrl string
 	var customSpendings float64
 
-	// Survey data in SurveyWeights
-
 	// Get the data from the database
 	err = db.QueryRow(`SELECT managerExperience, jiraEmail, jiraApiToken FROM TeamManager WHERE username=$1`, username).
-		Scan(ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
+		Scan(&ManagerWeights[0].Weight, &jiraEmail, &jiraToken)
 	if err != nil {
-		return "", err
-	}
-	err = db.QueryRow(`SELECT budget, deadline, monthlyExpenses, jiraURL, teamMeanExperience, customSpendings, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1`, projectCode).
-		Scan(ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, ManagerWeights[2].Weight, &customSpendings, ManagerWeights[1].Weight, ManagerWeights[3].Weight)
-	if err != nil {
-		return "", err
-	}
-	err = db.QueryRow(`SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1`, projectCode).
-		Scan(SurveyWeights[0].Weight, SurveyWeights[1].Weight, SurveyWeights[2].Weight, SurveyWeights[3].Weight, SurveyWeights[4].Weight, SurveyWeights[5].Weight)
-	if err != nil {
-		return "", err
+		log.Println(err)
 	}
 
+	err = db.QueryRow(`SELECT budget, deadline, monthlyExpenses, jiraURL, teamMeanExperience, customSpendings, weeklyTeamMeetings, clientMeetingsPerMonth FROM project WHERE projectCode=$1`, projectCode).
+		Scan(&ManagerWeights[4].Weight, &deadline, &monthlyExpenses, &jiraUrl, &ManagerWeights[2].Weight, &customSpendings, &ManagerWeights[1].Weight, &ManagerWeights[3].Weight)
+	if err != nil {
+		log.Println(err)
+	}
+	err = db.QueryRow(`SELECT supportFromTopManagement, testingQuality, documentationQuality, clarityOfRequirements, taskTooMuch, teamSatisfaction FROM survey WHERE projectCode=$1`, projectCode).
+		Scan(&SurveyWeights[0].Weight, &SurveyWeights[1].Weight, &SurveyWeights[2].Weight, &SurveyWeights[3].Weight, &SurveyWeights[4].Weight, &SurveyWeights[5].Weight)
+	if err != nil {
+		log.Println(err)
+	}
 	// Change budget weight and overdue tasks weight depending on the data
 	if ManagerWeights[4].Weight != 0 {
 		ManagerWeights[4].Weight = 1
 	}
 	overdue, _, _ := jira.GetNumOverDueIssuesFromProject(projectCode, jiraUrl, jiraEmail, jiraToken)
-	if overdue != 0 {
+	if overdue != -1 {
 		ManagerWeights[5].Weight = 1
 	}
 
-	// Get the suggestion with the lowest weight
-	var minWeightSuggestion string
-	var minWeight float64 = math.MaxFloat64
+	// Sort weights in increasing order
+	sort.Slice(ManagerWeights, func(i, j int) bool {
+		return ManagerWeights[i].Weight < ManagerWeights[j].Weight
+	})
+	sort.Slice(SurveyWeights, func(i, j int) bool {
+		return SurveyWeights[i].Weight < SurveyWeights[j].Weight
+	})
 
+	// Get top 4 lowest weights
+	var suggestions []string
 	for _, weight := range ManagerWeights {
-		if weight.Weight != 0 {
-			minWeight = math.Min(minWeight, weight.Weight)
-			if weight.Weight == minWeight {
-				minWeightSuggestion = weight.Suggestion
-			}
+		if weight.Weight > 0 && len(suggestions) < 4 {
+			suggestions = append(suggestions, weight.Suggestion)
 		}
 	}
-
 	for _, weight := range SurveyWeights {
-		if weight.Weight != 0 {
-			minWeight = math.Min(minWeight, weight.Weight)
-			if weight.Weight == minWeight {
-				minWeightSuggestion = weight.Suggestion
-			}
+		if weight.Weight > 0 && len(suggestions) < 4 {
+			suggestions = append(suggestions, weight.Suggestion)
 		}
 	}
-
-	return minWeightSuggestion, nil
-
+	return suggestions, nil
 }
