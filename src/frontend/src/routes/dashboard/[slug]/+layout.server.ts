@@ -243,7 +243,7 @@ export const load = (async (event) => {
 
     return {
 		// Selected project
-		project: await getProject(event.params.slug),
+		project: currentProject,
 		// All available projects
 		availableProjects: availableProjects.data
 	};

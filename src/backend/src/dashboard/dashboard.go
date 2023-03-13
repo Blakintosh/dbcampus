@@ -33,6 +33,10 @@ type DashboardDataList struct {
 	DashboardData []DashboardData `json:"data"`
 }
 
+type tmp struct {
+	ProjectCode string `json:"projectCode"`
+}
+
 // Project data
 type ProjectData struct {
 	ProjectCode            string    `json:"projectCode"`
@@ -60,14 +64,14 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 
 	var projectName string
 	var projectSuccess float64
-	var totalBudget float64
+	var budget float64
 	var customSpendings float64
 	var deadline time.Time
 	var monthlyExpenses float64
 	var teamMeanExperience float64
 	var weeklyTeamMeetings float64
 	var clientMeetingsPerMonth float64
-	var jiraProjectID string
+	var jiraProjectCode string
 	var jiraURL string
 
 	// Get the username from the session cookie
@@ -88,17 +92,21 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	// Get the username from the session cookie
 	username = session.Values["username"].(string)
 
+	var tempCode tmp
 	// Read the project code from the request json
-	err = json.NewDecoder(req.Body).Decode(&projectCode)
+	err = json.NewDecoder(req.Body).Decode(&tempCode)
 	if err != nil {
 		log.Println("Error reading project code: ", err)
 		http.Error(res, "Error reading project code", http.StatusInternalServerError)
+		return
 	}
+	projectCode = tempCode.ProjectCode
 
 	db, err := connector.ConnectDB()
 	if err != nil {
 		log.Println("Error connecting to database: ", err)
 		http.Error(res, "Error connecting to database", http.StatusInternalServerError)
+		return
 	}
 	defer connector.CloseDB(db)
 
@@ -107,6 +115,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Println("Error getting project name: ", err)
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
+		return
 	}
 
 	// // Get the project success rate from the database
@@ -139,7 +148,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 					projectName,
 					budget,
 					customSpendings,
-					monthlyExpenses
+					monthlyExpenses,
 					deadline,
 					teamMeanExperience,
 					weeklyTeamMeetings,
@@ -148,22 +157,23 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 					jiraURL
 				FROM Project
 				WHERE projectCode = $1 AND username = $2;`, projectCode, username).
-		Scan(&projectName, &totalBudget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectID, &jiraURL)
+		Scan(&projectName, &budget, &customSpendings, &monthlyExpenses, &deadline, &teamMeanExperience, &weeklyTeamMeetings, &clientMeetingsPerMonth, &jiraProjectCode, &jiraURL)
 	if err != nil {
 		log.Println("Error getting project data: ", err)
 		http.Error(res, "No project with that project code", http.StatusInternalServerError)
+		return
 	}
 
 	// combine
 
-	currentSpend := totalBudget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
+	currentSpend := budget - ((((deadline.Sub(time.Now())).Hours())/730.5)*monthlyExpenses + customSpendings)
 
 	// Put all the data we have about the project in a struct
 	project := ProjectData{
 		ProjectCode:            projectCode,
 		ProjectName:            projectName,
 		ProjSuccess:            float32(projectSuccess),
-		Budget:                 totalBudget,
+		Budget:                 budget,
 		MonthlyExpenses:        monthlyExpenses,
 		CustomSpendings:        customSpendings,
 		BudgetSpent:            currentSpend,
@@ -171,7 +181,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		TeamMeanExperience:     teamMeanExperience,
 		WeeklyTeamMeetings:     weeklyTeamMeetings,
 		ClientMeetingsPerMonth: clientMeetingsPerMonth,
-		JiraProjectID:          jiraProjectID,
+		JiraProjectID:          jiraProjectCode,
 		JiraURL:                jiraURL,
 	}
 

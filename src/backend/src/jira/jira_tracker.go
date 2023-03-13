@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"os"
 	"time"
 
 	jira "github.com/andygrunwald/go-jira/v2/cloud"
@@ -75,15 +74,6 @@ func getProject(email string, token string, url string, projectName string, clie
 
 /********************* Getting number of overdue tasks *************************/
 func GetNumOverDueIssuesFromProject(projectName string, jiraURL string, email string, token string) (int, int, error) {
-	/*************** Setting up looger and authentication *********************/
-	// Setting up logger
-	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer logFile.Close()
-	log.SetOutput(logFile)
-
 	// Jira team url
 	// jiraURL := "https://groupseven.atlassian.net" // User's Jira URL
 	// email := "Karim.Zeyada@warwick.ac.uk"
@@ -106,46 +96,50 @@ func GetNumOverDueIssuesFromProject(projectName string, jiraURL string, email st
 	user, _, err := client.User.GetCurrentUser(context.Background())
 	if err != nil {
 		log.Printf("Error getting current user: %v\n", err)
-		log.Fatalln("Make sure you have inputted the correct email, API token and jira team url.")
+		log.Println("Make sure you have inputted the correct email, API token and jira team url.")
 	}
-	log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
-	counter := 0
-	tasks := 0
+	if err == nil {
+		log.Printf("Accessed project. Logged as: %v", user.EmailAddress)
+		counter := 0
+		tasks := 0
 
-	// Getting all issues
-	issues, _, err := client.Issue.Search(context.Background(), "project = "+projectName, nil)
-	if err != nil {
-		log.Fatalf("Error getting issues: %v\n", err)
-	}
-
-	// Get the deadline of each issue
-	for _, issue := range issues {
-		// Get the deadline
-		tasks++
-		deadline := issue.Fields.Duedate
-		status := issue.Fields.Status.Name
-		deadlineByte, _ := deadline.MarshalJSON()
-		deadlineByte = deadlineByte[1 : len(deadlineByte)-1]
-
-		if string(deadlineByte) == "null" {
-			log.Printf("Issue %v has no deadline", issue.Key)
-			continue
-		}
-		ti, err := time.Parse("2006-01-02", string(deadlineByte))
+		// Getting all issues
+		issues, _, err := client.Issue.Search(context.Background(), "project = "+projectName, nil)
 		if err != nil {
-			log.Printf("Error parsing time: %v", err)
-			return -1, -1, err
-		}
-		deadlineTime := time.Time(ti)
-
-		// Check if the deadline is overdue deadline is of type time.Time
-		if status == "In Progress" && deadlineTime.Before(time.Now()) {
-			log.Printf("Issue %v is overdue", issue.Key)
-			counter++
+			log.Printf("Error getting issues: %v\n", err)
 		}
 
+		// Get the deadline of each issue
+		for _, issue := range issues {
+			// Get the deadline
+			tasks++
+			deadline := issue.Fields.Duedate
+			status := issue.Fields.Status.Name
+			deadlineByte, _ := deadline.MarshalJSON()
+			deadlineByte = deadlineByte[1 : len(deadlineByte)-1]
+
+			if string(deadlineByte) == "null" {
+				log.Printf("Issue %v has no deadline", issue.Key)
+				continue
+			}
+			ti, err := time.Parse("2006-01-02", string(deadlineByte))
+			if err != nil {
+				log.Printf("Error parsing time: %v", err)
+				return -1, -1, err
+			}
+			deadlineTime := time.Time(ti)
+
+			// Check if the deadline is overdue deadline is of type time.Time
+			if status == "In Progress" && deadlineTime.Before(time.Now()) {
+				log.Printf("Issue %v is overdue", issue.Key)
+				counter++
+			}
+
+		}
+		return counter, tasks, nil
 	}
-	return counter, tasks, nil
+
+	return -1, -1, err
 }
 
 /**************** Get priorties of all issues in a project ********************/
