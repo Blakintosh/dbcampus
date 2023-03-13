@@ -6,6 +6,7 @@
 	import type { SoftwareProjectSnippet } from "../../util/models";
 	import PageHeading from "../../components/common/PageHeading.svelte";
 	import { goto } from "$app/navigation";
+	import ActionButton from "../../components/common/ActionButton.svelte";
 
     let projects: Array<SoftwareProjectSnippet> = [];
     const getProjects = async () => {
@@ -17,7 +18,7 @@
         });
 
         if(availableProjectsResponse.status === 401) {
-            throw redirect(301, "/auth/login");
+            goto(301, "/auth/login");
         } else if(availableProjectsResponse.status === 500) {
             throw error(500, "Unable to contact the backend. Please try again later.");
         }
@@ -25,6 +26,11 @@
         const value = await availableProjectsResponse.json();
 
         projects = value.data;
+
+        console.log(projects.length);
+        if(projects.length === 0) {
+            goto("/dashboard/new");
+        }
     }
 </script>
 
@@ -83,6 +89,10 @@
                     {/await}
                 </tbody>
             </table>
+
+            <div class="flex">
+                <ActionButton label="Create new project..." on:click={() => goto("/dashboard/new")} additionalClasses="grow" loading={false}/>
+            </div>
         </div>
     </div>
 </main>
