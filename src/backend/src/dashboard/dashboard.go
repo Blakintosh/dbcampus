@@ -231,6 +231,8 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		JiraURL:                jiraURL,
 	}
 
+	log.Println("Project data: ", project)
+
 	softwareProject := SoftwareProject{
 		Code: projectCode,
 		Name: projectName,
@@ -270,7 +272,7 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 
 	// Return the data to the frontend as a JSON
 	res.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(res).Encode(project)
+	err = json.NewEncoder(res).Encode(softwareProject)
 	if err != nil {
 		log.Println("Error encoding project data: ", err)
 		http.Error(res, "Error encoding project data", http.StatusInternalServerError)
@@ -333,10 +335,9 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 	defer rows.Close()
 
 	// Scan the project codes and names
-	log.Println("rows.next: ", rows.Next())
+	var projectCode string
+	var projectName string
 	for rows.Next() {
-		var projectCode string
-		var projectName string
 		err = rows.Scan(&projectCode, &projectName)
 		if err != nil {
 			log.Println("Error scanning project codes: ", err)
@@ -355,11 +356,6 @@ func DashboardPage(res http.ResponseWriter, req *http.Request) {
 		log.Println("Project code: ", projectCodes[i])
 		log.Println("Project name: ", projectNames[i])
 	}
-
-	projects = append(projects, DashboardData{
-		ProjectCode: "foo",
-		ProjectName: "bar",
-	})
 	projectList.DashboardData = projects
 
 	// Return the data to the frontend as a JSON
