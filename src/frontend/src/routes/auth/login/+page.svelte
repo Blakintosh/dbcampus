@@ -51,7 +51,7 @@
 
 		if (response.status === 200) {
 			// Go to dashboard... temp for now
-			goto("/dashboard/1");
+			goto("/dashboard");
 		} else if(response.status === 401) {
             usernameIsError = true;
             passwordIsError = true;

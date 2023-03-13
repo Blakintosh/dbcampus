@@ -7,18 +7,22 @@ import sys
 import json
 
 def createHandler(data):
+    # set up form and service
     form_service = createService()
     form = createForm(form_service, data["title"])
+
+    # creare question depending on type specified
     for x in data["questions"]:
         
         if x["type"] == "scale":
             addQuestion(form_service, form, createScaleQuestion(x["title"], x["questionID"]))
         elif x["type"] == "choice":
             addQuestion(form_service, form, createYNQuestion(x["title"], x["questionID"]))
-    # print(form)
+
     return {"form_id": form["formId"], "url": form["responderUri"]}
 
 def createService():
+    # creating service
     SCOPES = "https://www.googleapis.com/auth/forms.body"
     DISCOVERY_DOC = "https://forms.googleapis.com/$discovery/rest?version=v1"
 
@@ -36,6 +40,7 @@ def createService():
 
 def createForm(form_service, title):
 
+    # base form layout
     NEW_FORM = {
         "info": {
             "title": title,
@@ -47,6 +52,7 @@ def createForm(form_service, title):
 
 
 def createScaleQuestion(title, qID, low = 1, high = 5, lowLabel = "Strongly Disagree", highLabel = "Strongly Agree"):
+    # base scale question with default vals
     NEW_QUESTION = {
         "requests": [{
             "createItem": {

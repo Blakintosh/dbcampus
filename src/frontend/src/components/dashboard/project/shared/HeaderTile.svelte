@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Tile from "./Tile.svelte";
 	import HealthRag from "../health/HealthRag.svelte";
-	import type { HealthSummary } from "../../../../util/models";
+	import type { HealthInformation } from "../../../../util/models";
 
     export let projectName: string = "";
     export let categoryName: string = "";
-	export let health: HealthSummary | null = {
+	export let health: HealthInformation | null = {
 		status: "unknown",
 		message: "",
 		issues: 0

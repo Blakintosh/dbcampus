@@ -6,6 +6,8 @@
 	import ManageProjectModal from "../../../components/dashboard/project/manage/ManageProjectModal.svelte";
 
 	export let data: LayoutData;
+
+    console.log("test" + data.availableProjects);
 </script>
 
 <svelte:head>
@@ -13,7 +15,7 @@
 	<meta name="description" content="Project overview dashboard.">
 </svelte:head>
 
-<ManageProjectModal visible/>
+<ManageProjectModal/>
 
 <main class="flex max-h-full h-[100vh] flex-col lg:flex-row">
 	<SideNav projects={data.availableProjects}/>

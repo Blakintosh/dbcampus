@@ -7,12 +7,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
@@ -26,44 +24,6 @@ type Manager struct {
 	Password                 string `json:"password"`
 	SessionID                string `json:"sessionid"`
 	ManagerSuccessPercentage string `json:"managersuccesspercentage"`
-}
-
-// Project data
-type Project struct {
-	ProjectID                int
-	TeamMangerID             string
-	ProjectSuccess           float32
-	Budget                   int64
-	MonthlyOutgoings         int
-	CurrentSpending          int64
-	Deadline                 time.Time
-	NotMetDeadlinePercentage float32
-	TeamCapability           float32
-	DocumentationLevel       float32
-}
-
-/**************************** Code Metrics ************************************/
-
-// Quality of code
-type CodeQuality struct {
-	ProjectID             int
-	NumberOfLanguagesUsed int
-	Reusability           float32
-	Interfacing           float32
-	TestQuality           float32
-	CodeErrorDensity      float32
-}
-
-// Code enviroment
-type CodeEnviroment struct {
-	ProjectID         int
-	Stability         float32
-	Complexity        float32
-	Clarity           float32
-	Dependence        float32
-	Schedule          float32
-	ObjectivesClarity float32
-	DevEnviroment     float32
 }
 
 /**************************** Survey Data *************************************/
@@ -87,10 +47,10 @@ type ClientMetrics struct {
 	YearlyMeetingNumber float32
 }
 
-var store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
+var Store = sessions.NewCookieStore([]byte("cookiesmakerfactory"))
 
 func Init() {
-	store.Options = &sessions.Options{
+	Store.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
@@ -109,7 +69,7 @@ func CreateSessionID() string {
 
 func SignupPage(res http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
-		fmt.Println("Not a POST request")
+		log.Println("Not a POST request")
 		http.Error(res, "GET request. Should be POST", 500)
 		return
 	}
@@ -117,7 +77,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	var inputtedUser Manager
 	// Access the request body
 	reqBody, err := ioutil.ReadAll(req.Body)
-	fmt.Println("reqBody register: ", string(reqBody))
+	log.Println("reqBody register: ", string(reqBody))
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", 500)
@@ -142,19 +102,18 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer connector.CloseDB(db)
 
-	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&inputtedUser.Username)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&inputtedUser.Username)
 
 	switch {
 	case err == sql.ErrNoRows:
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(inputtedUser.Password), bcrypt.DefaultCost)
-		fmt.Println("hashedPassword: ", hashedPassword)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Server error, unable to create your account.", 500)
 			return
 		}
 
-		_, err = db.Exec(`INSERT INTO teammanager (username, password) VALUES ($1, $2)`, inputtedUser.Username, hashedPassword)
+		_, err = db.Exec(`INSERT INTO TeamManager (username, password) VALUES ($1, $2)`, inputtedUser.Username, hashedPassword)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Server error, unable to create your account.", http.StatusUnauthorized)
@@ -167,9 +126,8 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	case err != nil:
 		log.Println(err)
 		http.Error(res, "Server error, unable to create your account.", http.StatusUnauthorized)
-		return
 	default:
-		fmt.Println("User already exists")
+		log.Println("User already exists")
 
 	}
 
@@ -193,7 +151,7 @@ func SignupPage(res http.ResponseWriter, req *http.Request) {
 	// }
 	// defer db.Close()
 
-	// err = db.QueryRow(`SELECT "username" FROM "users" WHERE username=$1`, username).Scan(&user)
+	// err = db.QueryRow(`SELECT username FROM "users" WHERE username=$1`, username).Scan(&user)
 
 	// switch {
 	// case err == sql.ErrNoRows:
@@ -246,11 +204,10 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	err = HasSessionAlready(res, req, inputtedUser)
 	if err == nil {
-		log.Println("User already logged in yes")
+		log.Println("User already logged in")
 		// change to json
 		json.NewEncoder(res).Encode("{\"message\": \"User already logged in\"}")
 		res.WriteHeader(200)
-		return
 	}
 
 	log.Println("User not logged in. Proceeding with login")
@@ -275,10 +232,10 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	}
 	defer connector.CloseDB(db)
 
-	err = db.QueryRow(`SELECT "username", "password" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
+	err = db.QueryRow(`SELECT username, password FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&databaseUsername, &databasePassword)
 	if err != nil {
 		log.Println(err)
-		http.Error(res, "Server error. Unable to access database", 500)
+		http.Error(res, "Username doesn't exist. You will need to register first", 401)
 		return
 	}
 
@@ -291,7 +248,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	log.Printf("User %s logged in\n", inputtedUser.Username)
 	// create a new session if successful
-	session, err := store.Get(req, "session")
+	session, err := Store.Get(req, "session")
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to get session.", 500)
@@ -327,7 +284,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 	log.Println("Session ID: ", session.ID)
 
 	// update database with session
-	_, err = db.Exec(`UPDATE teammanager SET sessionid=$1 WHERE username=$2`, session.ID, inputtedUser.Username)
+	_, err = db.Exec(`UPDATE TeamManager SET sessionID=$1 WHERE username=$2`, session.ID, inputtedUser.Username)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to update session ID.", 500)
@@ -336,7 +293,7 @@ func LoginPage(res http.ResponseWriter, req *http.Request) {
 
 	// Select the logged in user and return their session ID
 	var sessionID string
-	err = db.QueryRow(`SELECT "sessionid" FROM "teammanager" WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
+	err = db.QueryRow(`SELECT sessionID FROM TeamManager WHERE username=$1`, inputtedUser.Username).Scan(&sessionID)
 	if err != nil {
 		log.Println(err)
 		http.Error(res, "Server error, unable to update session ID.", 500)
@@ -367,7 +324,7 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 	// session := store.Get()
 	var user string
 
-	session, err := store.Get(req, "session")
+	session, err := Store.Get(req, "session")
 
 	if err != nil || session.Values["authenticated"] == nil {
 		log.Println("Unable to get session: ", err)
@@ -377,7 +334,7 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 	sessionID = session.Values["sessionId"].(string)
 	log.Println("Session ID: ", sessionID)
 
-	err = db.QueryRow(`SELECT "username" FROM "teammanager" WHERE sessionid=$1`, sessionID).Scan(&user)
+	err = db.QueryRow(`SELECT username FROM TeamManager WHERE sessionID=$1`, sessionID).Scan(&user)
 	if err != nil {
 		log.Println("Error checking session: ", err)
 	}
@@ -386,13 +343,6 @@ func HasSessionAlready(res http.ResponseWriter, req *http.Request, inputtedUser 
 		return nil
 	}
 	return errors.New("couldn't find a user with the session id specified. Redirect to login")
-}
-
-func DashboardPage(res http.ResponseWriter, req *http.Request) {
-	// Run the dashboard on svelte.js
-	res.Header().Set("Content-Type", "application/json")
-	res.Header().Set("Access-Control-Allow-Origin", "*")
-
 }
 
 // func getProjectDataForUser(username string)

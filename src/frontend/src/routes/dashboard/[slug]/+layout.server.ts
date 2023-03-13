@@ -1,5 +1,6 @@
 import type { SoftwareProject } from "../../../util/models";
 import { error, redirect } from "@sveltejs/kit";
+import { goto } from "$app/navigation";
 
 // Placeholder
 const projects: Array<SoftwareProject> = [
@@ -87,9 +88,9 @@ const projects: Array<SoftwareProject> = [
 		id: 2,
 		name: "Foo",
 		health: {
-			status: "warning",
 			message: "Placeholder",
-			issues: 2
+            suggestions: [],
+            percentageHealth: 0.512
 		},
 		surveys: {
 			client: {
@@ -150,9 +151,9 @@ const projects: Array<SoftwareProject> = [
 				suggestions: []
 			},
 			health: {
-				status: "danger",
 				message: "Responses with critically low satisfaction are present in the client survey.",
-				issues: 4
+				suggestions: [],
+                percentageHealth: 0.3
 			}
 		},
 		budget: {
@@ -162,9 +163,9 @@ const projects: Array<SoftwareProject> = [
 				0, 1058, 5056, 12120, 14150, 15650, 18650
 			],
 			health: {
-				status: "normal",
 				message: "Project is trending for completion under budget.",
-				issues: 0
+				suggestions: [],
+                percentageHealth: 1
 			}
 		}
 	}
@@ -179,29 +180,73 @@ const getProject = (async (id: number) => {
 	throw error(404, "Project not found");
 });
 
-const getAvailableProjects = (async () => {
-	const result = [];
-	for(const project of projects) {
-		result.push({
-			id: project.id,
-			name: project.name
-		});
-	}
+const getAvailableProjects = (async (event) => {
+	const response = await event.fetch("/api/dashboard/getProjects", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
 
-	return result;
+    const projectsAvailable = await response.json();
+
+    if(projectsAvailable.length === 0) {
+        goto("/dashboard/new");
+    }
+
+	return await projectsAvailable;
 });
 
 // @ts-expect-error - Params any-type
-export const load = (async ({ params }) => {
+export const load = (async (event) => {
 	/* 
 		BE connection: Fetch the project with the given slug from the database,
 		return it if the user owns it and it exists, otherwise void the request.
 	*/
 
+    const currentProject = await event.fetch("/api/dashboard/getProject", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            projectCode: event.params.slug
+        })
+    });
+
+    if(currentProject.status === 404) {
+        throw redirect(301, "/dashboard");
+    } else if(currentProject.status === 401) {
+        throw redirect(301, "/auth/login");
+    } else if(currentProject.status === 500) {
+        throw error(500, "Unable to contact the backend. Please try again later.");
+    }
+
+    const currentProjectData = await currentProject.json();
+
+    const availableProjectsResponse = await event.fetch("/api/dashboard/getProjects", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if(availableProjectsResponse.status === 401) {
+        throw redirect(301, "/auth/login");
+    } else if(availableProjectsResponse.status === 500) {
+        throw error(500, "Unable to contact the backend. Please try again later.");
+    }
+
+    const availableProjects = await availableProjectsResponse.json();
+
+    if(!availableProjects || availableProjects.length === 0) {
+        throw redirect(301, "/dashboard/new");
+    }
+
     return {
 		// Selected project
-		project: await getProject(params.slug),
+		project: currentProjectData,
 		// All available projects
-		availableProjects: await getAvailableProjects()
+		availableProjects: availableProjects.data
 	};
 });

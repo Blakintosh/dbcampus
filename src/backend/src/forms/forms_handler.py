@@ -11,25 +11,25 @@ def main(data):
             res = createHandler(data)
             print(res)
             
-            #Serializing json
+            #converting to json string
             json_object = json.dumps(res, indent=4)
             
-            # Writing to sample.json
+            # Writing to result json
             with open("res.json", "w") as outfile:
                 outfile.write(json_object)
 
         elif (data["function"] == "retrieve"):
-            # pass
+            
             res = retrieveHandler(data)
             print(res)
             
-            #Serializing json
+            #converting to json string
             json_object = json.dumps(res, indent=4)
             
-            # Writing to sample.json
+            # Writing to result json
             with open("res.json", "w") as outfile:
                 outfile.write(json_object)
-            # return json.dumps(res)
+            
         else:
             print("bad json")
             return False

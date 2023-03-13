@@ -6,25 +6,25 @@ CREATE TABLE TeamManager(
     sessionID VARCHAR(120),
     jiraEmail VARCHAR(120),
     jiraApiToken VARCHAR(120),
-    managerExperience DECIMAL(3,2)
+    managerExperience DECIMAL(5,3)
 );
 
 DROP TABLE IF EXISTS Project CASCADE;
 CREATE TABLE Project(
-    projectID SERIAL PRIMARY KEY,
-    projectCode VARCHAR(50) UNIQUE NOT NULL,
-    teamManagerID INTEGER NOT NULL REFERENCES TeamManager(teamManagerID),
+    projectCode VARCHAR(3) NOT NULL,
+    username VARCHAR(50) NOT NULL REFERENCES TeamManager(username),
+    projectName VARCHAR(120),
     projSuccess DECIMAL(3,2),
-    budget INTEGER,
-    monthlyExpenses INTEGER,
-    currentSpend INTEGER,
-    nextDeadline TIMESTAMP,
-    finalDeadline TIMESTAMP,
-    prevDeadlinesMet INTEGER,
-    teamMeanExperience DECIMAL(3,2),
-    weeklyTeamMeetings DECIMAL(3,2),
-    clientMeetingsPerMonth DECIMAL(3,2),
-    jiraURL VARCHAR(120)
+    budget DECIMAL(17,2),
+    monthlyExpenses DECIMAL(17,2),
+    customSpendings DECIMAL(17,2),
+    deadline TIMESTAMP,
+    teamMeanExperience DECIMAL(5,3),
+    weeklyTeamMeetings DECIMAL(5,3),
+    clientMeetingsPerMonth DECIMAL(5,3),
+    jiraProjectCode VARCHAR(120),
+    jiraURL VARCHAR(120),
+    PRIMARY KEY (projectCode, username)
 );
 
 DROP TABLE IF EXISTS TeamSurveys CASCADE;
@@ -45,6 +45,13 @@ DROP TABLE IF EXISTS Client CASCADE;
 CREATE TABLE Client(
     clientID SERIAL PRIMARY KEY
 );
+
+-- Insert dummy team manager data
+INSERT INTO TeamManager (username, password, managerExperience) VALUES ('admin', '$2a$10$dW7ufHTFVBJdTh5LAqmmJ.PyLVOG6CvqUkawV/keN.PxtrgcMuRGq', 5.0);
+
+-- Insert dummy project data
+INSERT INTO Project (projectCode, username, projectName, budget, monthlyExpenses, customSpendings, deadline, teamMeanExperience, weeklyTeamMeetings, clientMeetingsPerMonth) VALUES ('ABC', 'admin', 'Project ABC', 1000000.00, 1000.00, 10000.00, '2023-12-31 23:59:59', 5.0, 1.0, 1.0);
+
 
 -- DROP TABLE IF EXISTS ClientSurveys CASCADE;
 -- CREATE TABLE ClientSurveys(

@@ -5,14 +5,13 @@
 
 	export let projects: Array<SoftwareProjectSnippet> = [];
 
-	let projectTarget: number = $page.data.project.id;
+	let projectTarget: string = $page.data.project?.code ?? "none";
 
 	$: urlEnd = $page.url.pathname.split("/").at(-1);
 
-
 	const changeProject = () => {
 		console.log(urlEnd);
-		const destination = urlEnd !== undefined && ["health", "jira", "budget", "surveys"].includes(urlEnd)
+		const destination = urlEnd !== undefined && ["budget", "surveys"].includes(urlEnd)
 			? `/dashboard/${projectTarget}/${urlEnd}`
 			: `/dashboard/${projectTarget}`;
 		console.log(destination);
@@ -24,9 +23,13 @@
 	<select bind:value={projectTarget} on:change={(e) => changeProject()}
 		class="bg-slate-800 border border-slate-600 rounded-md p-2 text-sm font-medium w-full">
 		{#each projects as project}
-			<option value="{project.id}">
+			<option value="{project.code}">
 				{project.name}
 			</option>
+        {:else}
+            <option value="none">
+                No project selected
+            </option>
 		{/each}
 	</select>
 </div>

@@ -2,20 +2,24 @@ package main
 
 import (
 	auth "authentication"
-	"connector"
+	connector "connector"
+	dash "dashboard"
 	"log"
-	"mime"
 	"net/http"
 	"os"
+
+	mux "github.com/gorilla/mux"
 )
 
 func main() {
-	logFile, err := os.OpenFile("log.log", os.O_CREATE|os.O_APPEND, 0644)
+	logFile, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer logFile.Close()
 	log.SetOutput(logFile)
+
+	log.Println("Server started")
 
 	db, err := connector.ConnectDB()
 	if err != nil {
@@ -30,10 +34,13 @@ func main() {
 
 	auth.Init()
 
-	mime.AddExtensionType(".js", "application/javascript")
+	router := mux.NewRouter()
 
-	http.HandleFunc("/register", auth.SignupPage)
-	http.HandleFunc("/login", auth.LoginPage)
-	http.HandleFunc("/dashboard", auth.DashboardPage)
-	http.ListenAndServe(":8081", nil)
+	router.HandleFunc("/register", auth.SignupPage)
+	router.HandleFunc("/login", auth.LoginPage)
+	router.HandleFunc("/dashboard/project", dash.ProjectPage)
+	router.HandleFunc("/dashboard", dash.DashboardPage)
+	router.HandleFunc("/newProject", dash.CreateProject)
+	err = http.ListenAndServe(":8081", router)
+	log.Println("Server stopper with error: ", err)
 }

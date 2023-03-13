@@ -20,11 +20,13 @@ export async function fetchFromBackend(request: Request, endpoint: string, data?
         body: JSON.stringify(data)
     });
 
+    console.log(endpoint + " " + response.status);
+
     if (response.ok) {
         return response;
     } else {
         console.error('Error:', response.statusText);
     }
 
-    return Promise.reject("The request to the backend failed to resolve.");
+    return Promise.reject("The request to the backend failed to resolve. Endpoint "+endpoint);
 }

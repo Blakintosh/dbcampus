@@ -3,9 +3,11 @@
     import AuthenticationView from "../../../components/auth/AuthenticationView.svelte";
 	import TextField from "../../../components/auth/TextField.svelte";
 	import PasswordField from "../../../components/auth/PasswordField.svelte";
+	import { goto } from "$app/navigation";
 
 	let username: string = "";
 	let password: string = "";
+    let managerExperience: string = "";
     let confirmPassword: string = "";
 
 	let usernameIsError = false;
@@ -55,14 +57,15 @@
 			body: JSON.stringify({
 				username: username,
 				password: password,
+                managerExperience: Number(managerExperience)
 			}),
 		});
 
-		const data = await response.json();
-		if (data.status === 200) {
-			alert(`${JSON.stringify(data)}`);
-		}
 		authenticating = false;
+
+        if(response.status === 200) {
+            goto("/auth/login");
+        }
 	};
 </script>
 
@@ -77,6 +80,7 @@
     </span>
     <span slot="body" class="w-full">
         <TextField label="Username" name="username" bind:value={username} isError={usernameIsError} errorMessage={usernameErrorMessage} />
+        <TextField label="How much experience do you have?" name="experience" bind:value={managerExperience} />
         <PasswordField label="Password" name="password" bind:value={password} isError={passwordIsError} errorMessage={passwordErrorMessage} />
         <PasswordField label="Confirm Password" name="confirmPassword" bind:value={confirmPassword} isError={confirmPasswordIsError} errorMessage={confirmPasswordErrorMessage} />
         

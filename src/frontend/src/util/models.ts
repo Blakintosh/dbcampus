@@ -16,7 +16,7 @@ export type SurveyFactor = {
  * Survey summary tile sub-model of a SoftwareProject.
  */
 export type SurveySummary = {
-    date: Date,
+    date: string,
     factors: Array<SurveyFactor>,
 	suggestions: Array<string>
 }
@@ -27,32 +27,32 @@ export type SurveySummary = {
 export type SoftwareSurveys = {
 	client?: SurveySummary,
 	team?: SurveySummary,
-	health: HealthSummary
+	health: HealthInformation
 }
 
 /**
  * Health summary tile sub-model of a SoftwareProject.
  */
-export type HealthSummary = {
-    status: RagClassification,
+export type HealthInformation = {
 	message: string,
-    issues: number
+    suggestions: Array<string>,
+    percentageHealth: number
 }
 
 export type ProjectBudget = {
 	budget: number,
 	spend: number,
 	spendOverTime: Array<number>,
-	health: HealthSummary
+	health: HealthInformation
 }
 
 /**
  * Primary model for the API request for a project.
  */
 export type SoftwareProject = {
-	id: number,
+	code: string,
     name: string
-    health: HealthSummary,
+    health: HealthInformation,
     surveys: SoftwareSurveys,
 	budget: ProjectBudget
 };
@@ -61,7 +61,7 @@ export type SoftwareProject = {
  * Model that saturates the bare minimum properties needed to render the sidebar of available projects.
  */
 export type SoftwareProjectSnippet = {
-	id: number,
+	code: string,
     name: string
 }
 
@@ -81,4 +81,36 @@ export type SurveyQuestion = {
     theme: string,
     question: string,
     enabled: boolean
+}
+
+export type IssueSurveyRequest = {
+    projectCode: string,
+    function: string,
+    title: string,
+    questions: Array<IssueSurveyQuestion>
+}
+
+export type SurveyQuestionType = "scale";
+
+export type IssueSurveyQuestion = {
+    title: string,
+    type: SurveyQuestionType,
+    questionID: string
+}
+
+export type CreateProjectData = {
+    projectCode: string,
+    projectName: string,
+    budget: number,
+    monthlyExpenses: number,
+    customSpendings: number,
+    deadline: Date,
+    managerExperience: number,
+    teamMeanExperience: number,
+    weeklyTeamMeetings: number,
+    clientMeetingsPerMonth: number,
+    jiraProjectId: string,
+    jiraEmail: string,
+    jiraApiToken: string,
+    jiraURL: string
 }

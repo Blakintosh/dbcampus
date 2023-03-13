@@ -8,7 +8,7 @@
 	import SurveyRundown from "../../../components/dashboard/project/surveyRundown/SurveyRundown.svelte";
 
     import { modalCategory, modalVisible } from "../../../util/stores";
-	import { ProjectManageCategory } from '../../../util/models';
+	import { ProjectManageCategory, type HealthInformation, type SoftwareProject } from '../../../util/models';
 	import HealthTrafficLight from "../../../components/dashboard/project/health/HealthTrafficLight.svelte";
 	import RagCircle from "../../../components/dashboard/project/common/RagCircle.svelte";
 
@@ -18,6 +18,28 @@
     }
 
 	$: project = $page.data.project;
+
+    let projectHealth = "unknown";
+    let healthColourClass = "bg-grey-600";
+    let healthHeading = "No data."
+    $: {
+        const health: HealthInformation = project.health;
+        const percentageHealth = health.percentageHealth;
+
+        if(percentageHealth <= 0.4) {
+            projectHealth = "danger";
+            healthColourClass = "bg-red-600";
+            healthHeading = "Significant issues present.";
+        } else if(percentageHealth <= 0.7) {
+            projectHealth = "warning";
+            healthColourClass = "bg-amber-600";
+            healthHeading = "Issues present.";
+        } else {
+            projectHealth = "normal";
+            healthColourClass = "bg-green-600";
+            healthHeading = "Project is OK.";
+        }
+    }
 </script>
 
 <ProjectViewLayout gridClass="grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -33,15 +55,14 @@
 	</HeaderTile>
     <Tile heading="Project Health" tileClass="col-span-3 md:col-span-4 lg:col-span-2" isDark>
         <div class="flex gap-4 xl:gap-8 items-center">
-            <HealthTrafficLight status="danger" sizeClass="w-10 h-10 m-1 xl:w-14 xl:h-14 xl:m-1.5"/>
+            <HealthTrafficLight status={projectHealth} sizeClass="w-10 h-10 m-1 xl:w-14 xl:h-14 xl:m-1.5"/>
             <div class="w-full">
                 <div class="inline-block">
-                    <h1 class="text-5xl xl:text-7xl">38.4<span class="text-2xl xl:text-4xl font-medium text-slate-200 mx-2">%</span></h1>
-                    <h2 class="text-lg xl:text-xl text-slate-200">&pm; <span class="text-xl xl:text-2xl text-slate-100">5.2</span>%</h2>
-                    <div class="bg-red-600 w-full h-1 my-2 rounded-sm"></div>
-                    <h3 class="font-medium text-md xl:text-lg">Significant issues present.</h3>
+                    <h1 class="text-5xl xl:text-7xl">{Math.round(project.health.percentageHealth * 1000) / 10}<span class="text-2xl xl:text-4xl font-medium text-slate-200 mx-2">%</span></h1>
+                    <div class="{healthColourClass} w-full h-1 my-2 rounded-sm"></div>
+                    <h3 class="font-medium text-md xl:text-lg">{healthHeading}</h3>
                 </div>
-                <p class="text-xs xl:text-md">The latest assessment has identified multiple areas of issue which need to be addressed urgently in order to get this project back on track.</p>
+                <p class="text-xs xl:text-md"></p>
             </div>
         </div>
     </Tile>
@@ -81,7 +102,7 @@
 		</p>
 	</Tile>
 	<Tile heading="Project Budget" tileClass="col-span-3 md:col-span-4 lg:col-span-6 xl:col-span-3">
-		<BudgetRundown />
+		<BudgetRundown {...project.budget} />
 
 		<p class="flex justify-center">
 			<Button label="Update Spend or Budget"/>
