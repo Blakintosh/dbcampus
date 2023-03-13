@@ -56,6 +56,52 @@ type ProjectData struct {
 	JiraURL                string    `json:"jiraURL"`
 }
 
+// One to one mapping of the json models
+// SurveyFactor is a sub-model for elements of a SurveySummary.
+type SurveyFactor struct {
+	Name         string  `json:"name"`
+	Question     string  `json:"question"`
+	Satisfaction float64 `json:"satisfaction"`
+}
+
+// SurveySummary is a sub-model of a SoftwareProject.
+type SurveySummary struct {
+	Date        time.Time      `json:"date"`
+	Factors     []SurveyFactor `json:"factors"`
+	Suggestions []string       `json:"suggestions"`
+}
+
+// HealthInformation is a sub-model of a SoftwareProject.
+type HealthInformation struct {
+	Message          string   `json:"message"`
+	Suggestions      []string `json:"suggestions"`
+	PercentageHealth float64  `json:"percentageHealth"`
+}
+
+// SoftwareSurveys is a sub-model that stores all information on the surveys undertaken by a SoftwareProject.
+type SoftwareSurveys struct {
+	Client *SurveySummary    `json:"client,omitempty"`
+	Team   *SurveySummary    `json:"team,omitempty"`
+	Health HealthInformation `json:"health"`
+}
+
+// ProjectBudget is a sub-model of a SoftwareProject.
+type ProjectBudget struct {
+	Budget        float64           `json:"budget"`
+	Spend         float64           `json:"spend"`
+	SpendOverTime []float64         `json:"spendOverTime"`
+	Health        HealthInformation `json:"health"`
+}
+
+// SoftwareProject is the primary model for the API request for a project.
+type SoftwareProject struct {
+	Code    string            `json:"code"`
+	Name    string            `json:"name"`
+	Health  HealthInformation `json:"health"`
+	Surveys SoftwareSurveys   `json:"surveys"`
+	Budget  ProjectBudget     `json:"budget"`
+}
+
 // DashboardPage is the handler for the main dashboard page
 func ProjectPage(res http.ResponseWriter, req *http.Request) {
 	// Get the project code and team manager ID from the request
@@ -183,6 +229,43 @@ func ProjectPage(res http.ResponseWriter, req *http.Request) {
 		ClientMeetingsPerMonth: clientMeetingsPerMonth,
 		JiraProjectID:          jiraProjectCode,
 		JiraURL:                jiraURL,
+	}
+
+	softwareProject := SoftwareProject{
+		Code: projectCode,
+		Name: projectName,
+		Health: HealthInformation{
+			Message:          "",
+			Suggestions:      []string{},
+			PercentageHealth: 0,
+		},
+		Surveys: SoftwareSurveys{
+			Client: &SurveySummary{
+				Date:        time.Now(),
+				Factors:     []SurveyFactor{},
+				Suggestions: []string{},
+			},
+			Team: &SurveySummary{
+				Date:        time.Now(),
+				Factors:     []SurveyFactor{},
+				Suggestions: []string{},
+			},
+			Health: HealthInformation{
+				Message:          "",
+				Suggestions:      []string{},
+				PercentageHealth: 0,
+			},
+		},
+		Budget: ProjectBudget{
+			Budget:        budget,
+			Spend:         0,
+			SpendOverTime: []float64{},
+			Health: HealthInformation{
+				Message:          "",
+				Suggestions:      []string{},
+				PercentageHealth: 0,
+			},
+		},
 	}
 
 	// Return the data to the frontend as a JSON
