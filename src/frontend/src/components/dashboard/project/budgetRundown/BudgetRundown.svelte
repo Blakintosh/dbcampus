@@ -1,12 +1,13 @@
 <script lang="ts">
 	import BudgetValue from "./BudgetValue.svelte";
 
-	export let date: Date = new Date();
+	export let date: string;
+    $: jsDate = new Date(date);
 </script>
 
 <div class="mb-4">
 	Last Budget Report: <span class="ml-1 font-medium">{
-		date.toLocaleDateString("en-GB", {
+		jsDate.toLocaleDateString("en-GB", {
 			year: "numeric",
 			month: "long",
 			day: "numeric"

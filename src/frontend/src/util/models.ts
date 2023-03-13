@@ -16,7 +16,7 @@ export type SurveyFactor = {
  * Survey summary tile sub-model of a SoftwareProject.
  */
 export type SurveySummary = {
-    date: Date,
+    date: string,
     factors: Array<SurveyFactor>,
 	suggestions: Array<string>
 }

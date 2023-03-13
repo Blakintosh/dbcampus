@@ -3,13 +3,14 @@
 	import SurveyRag from "./SurveyRag.svelte";
 	import SurveyResultRow from "./SurveyResultRow.svelte";
 
-    export let date: Date;
+    export let date: string;
+    $: jsDate = new Date(date);
 	export let factors: Array<SurveyFactor>;
 	export let suggestions: Array<string>;
 </script>
 
 <div>
-    <h1 class="text-lg my-2">On {date.toLocaleDateString("en-gb")}, you asked, and they answered:</h1>
+    <h1 class="text-lg my-2">On {jsDate.toLocaleDateString("en-gb")}, you asked, and they answered:</h1>
 
     <table class="w-full border-collapse h-full rounded-md overflow-hidden my-4">
         <thead>

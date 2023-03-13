@@ -222,6 +222,8 @@ export const load = (async (event) => {
         throw error(500, "Unable to contact the backend. Please try again later.");
     }
 
+    const currentProjectData = await currentProject.json();
+
     const availableProjectsResponse = await event.fetch("/api/dashboard/getProjects", {
         method: "POST",
         headers: {
@@ -243,7 +245,7 @@ export const load = (async (event) => {
 
     return {
 		// Selected project
-		project: currentProject,
+		project: currentProjectData,
 		// All available projects
 		availableProjects: availableProjects.data
 	};
