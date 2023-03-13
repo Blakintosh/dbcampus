@@ -2,6 +2,8 @@
 	import BudgetValue from "./BudgetValue.svelte";
 
 	export let date: string;
+    export let spend: number;
+    export let budget: number;
     $: jsDate = new Date(date);
 </script>
 
@@ -15,6 +17,6 @@
 		}</span>
 </div>
 
-<BudgetValue heading="Current Spend" value={13452.50} currency="£"/>
+<BudgetValue heading="Current Spend" value={spend} currency="£"/>
 
-<BudgetValue heading="Total Budget" value={23000} currency="£"/>
+<BudgetValue heading="Total Budget" value={budget} currency="£"/>

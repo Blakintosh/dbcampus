@@ -213,7 +213,7 @@ func GetPercentage(username string, projectCode string) (float64, error) {
 	}
 
 	// Change budget weight and overdue tasks weight depending on the data
-	if ManagerWeights[4].Weight != 0 {
+	if budget != 0 {
 		ManagerWeights[4].Weight = 1
 	}
 	overdue, _, _ := jira.GetNumOverDueIssuesFromProject(projectCode, jiraUrl, jiraEmail, jiraToken)

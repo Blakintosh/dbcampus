@@ -102,7 +102,7 @@
 		</p>
 	</Tile>
 	<Tile heading="Project Budget" tileClass="col-span-3 md:col-span-4 lg:col-span-6 xl:col-span-3">
-		<BudgetRundown />
+		<BudgetRundown {...project.budget} />
 
 		<p class="flex justify-center">
 			<Button label="Update Spend or Budget"/>

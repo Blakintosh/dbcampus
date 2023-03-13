@@ -41,5 +41,6 @@ func main() {
 	router.HandleFunc("/dashboard/project", dash.ProjectPage)
 	router.HandleFunc("/dashboard", dash.DashboardPage)
 	router.HandleFunc("/newProject", dash.CreateProject)
-	http.ListenAndServe(":8081", router)
+	err = http.ListenAndServe(":8081", router)
+	log.Println("Server stopper with error: ", err)
 }

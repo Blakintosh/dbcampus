@@ -11,7 +11,7 @@
 
 	const changeProject = () => {
 		console.log(urlEnd);
-		const destination = urlEnd !== undefined && ["health", "jira", budget, "surveys"].includes(urlEnd)
+		const destination = urlEnd !== undefined && ["budget", "surveys"].includes(urlEnd)
 			? `/dashboard/${projectTarget}/${urlEnd}`
 			: `/dashboard/${projectTarget}`;
 		console.log(destination);
