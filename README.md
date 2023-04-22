@@ -1,3 +1,5 @@
+> **This branch is an archive of the version that was 'latest' as of the time of submission of the final report and hence cannot be written to.**
+
 # Pitstop (aka. dbcampus)
 Repository for the CS261 Group 7 software engineering project
 
