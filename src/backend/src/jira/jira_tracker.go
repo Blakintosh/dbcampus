@@ -212,8 +212,8 @@ func getPriorities(email string, token string, url string, projectName string, c
 // Get all projects
 // Jira team url
 // var jiraURL = "https://groupseven.atlassian.net" // User's Jira URL
-// var email = "Karim.Zeyada@warwick.ac.uk"
-// var token = "ATATT3xFfGF0HNtow0fIs24CsTvCYbEG5RkrnO9UaayuQCfn_K797qIKQ8TRtJitAayzDld3JZHuB88ujP_cTFQctzuWHS-luFE9A48EjMJWa5TLiXjvzXEuynPTCtLGH5eweIvwwQvxCbCGZoIcJ2f0FvHPzn_dLDdUpZbwFUPIFdXlGfWYxQs=B6C3BA30"
+// var email = ""
+// var token = ""
 
 // // Authentication data, user has to input both email and API token
 // var tr = jira.BasicAuthTransport{
